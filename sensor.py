@@ -11,13 +11,13 @@ s.connect((argv[1], 8888))
 print("Successfully connected to server")
 
 id = argv[2]
-s.send(bytes(id+"\n", "utf-8"))
+s.send(bytes(id+"\n", encoding="utf-8"))
 
-
+sleep(1)
 while True:
     request = s.recv(1024).decode("utf-8")
     print("Server requested data")
     data = randint(-10, 10)
-    s.send(str(data)+"\n")
+    s.send(bytes(str(data)+"\n", encoding="utf-8"))
     print("sent data to the server")
     sleep(1)

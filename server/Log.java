@@ -12,4 +12,7 @@ public class Log implements Serializable{
     public Event get(int timestamp){
         return null;
     }
+
+    public void clear() {
+    }
 }

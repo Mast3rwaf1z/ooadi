@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.parser.ParseException;
-
 public class SensorManager implements Runnable {
     private Database db;
     private Map<String, Sensor> sensors = new HashMap<>();
@@ -40,7 +38,7 @@ public class SensorManager implements Runnable {
                     Server.getCli().print("The id is invalid, cutting off the connection!");
                     sensor.close();
                 }
-            } catch (IOException | ParseException e) {
+            } catch (IOException e) {
                 Server.getCli().printException(e);
                 
             }

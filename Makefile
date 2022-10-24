@@ -9,7 +9,7 @@ sensorcount = 4
 sensors = $(shell seq -s " " $(sensorcount))
 
 arg1=localhost
-arg2=0
+arg2=1
 
 compile:
 	@$(jc) -cp $(classpath) server/Server.java -d bin

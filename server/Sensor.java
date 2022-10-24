@@ -20,6 +20,7 @@ public class Sensor {
     public void transmit(String data) throws IOException{
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         writer.write(data+"\n");
+        writer.flush();
     }
     public String receive() throws IOException{
         BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));

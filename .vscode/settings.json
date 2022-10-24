@@ -3,6 +3,6 @@
         "lib/**/*.jar",
         "libs/jline-3.5.1.jar",
         "libs/jline-3.21.1-SNAPSHOT.jar",
-        "libs/json-simple-1.1.1.jar"
+        "libs/json-20220924.jar"
     ]
 }

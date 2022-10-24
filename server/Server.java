@@ -1,24 +1,29 @@
 package server;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class Server {
     private SensorManager sensorManager;
-    private Log log;
     private RequestHandler requestHandler;
+    static private Log log;
+    static private Database db;
     static private CommandLineInterface commandLineInterface;
-    static Server server;
+    static private Server server;
 
     private Server() throws IOException{
         sensorManager = new SensorManager();
         log = new Log();
         requestHandler = new RequestHandler();
         commandLineInterface = new CommandLineInterface();
+        db = new Database();
         
     }
 
     public static void main(String[] args) throws IOException {
         server = new Server();
+        db.clear();
+        log.clear();
         server.run();
     }
     public void run() throws IOException{
@@ -37,8 +42,9 @@ public class Server {
             } catch (InterruptedException e) {
                 commandLineInterface.printException(e);
             }
-            sensorManager.collect();
+            Map<String, String> data = sensorManager.collect();
             commandLineInterface.print("Collected a set of data");
+            db.save(data);
         }
     }
 
