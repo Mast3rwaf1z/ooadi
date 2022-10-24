@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import server.events.SensorConnectEvent;
+import server.events.SensorDisconnectEvent;
 
 public class SensorManager implements Runnable {
     private Database db;
@@ -21,21 +25,23 @@ public class SensorManager implements Runnable {
 
     @Override
     public void run() {
-        Server.getCli().print("accepting sensors");
+        Server.getCli().debugPrint("accepting sensors");
         while(true){
             try {
                 Socket sensor = socket.accept();
-                Server.getCli().print("accepted sensor, validating id...");
+                Server.getCli().debugPrint("accepted sensor, validating id...");
                 List<String> registeredSensors = db.getIds();
                 String id = new BufferedReader(new InputStreamReader(sensor.getInputStream())).readLine();
-                Server.getCli().print("The received id is: " + id);
+                Server.getCli().debugPrint("The received id is: " + id);
 
                 if(registeredSensors.contains(id)){ //TODO: add an actual condition here later
-                    Server.getCli().print("The id is valid, adding sensor to map of sensors...");
-                    sensors.put(String.valueOf(sensors.size()+1), new Sensor(sensor));
+                    Server.getCli().acceptPrint("The id is valid, adding sensor to map of sensors...");
+                    sensors.put(id, new Sensor(sensor));
+                    Server.getLog().add(new SensorConnectEvent(id, sensor.getInetAddress().getHostAddress()));
                 }
                 else{
-                    Server.getCli().print("The id is invalid, cutting off the connection!");
+                    Server.getCli().errorPrint("The id is invalid, cutting off the connection!");
+                    Server.getLog().add(new SensorDisconnectEvent(id, socket.getInetAddress().getHostAddress()));
                     sensor.close();
                 }
             } catch (IOException e) {
@@ -46,18 +52,38 @@ public class SensorManager implements Runnable {
     }
     
     public Map<String, String> collect() throws IOException{
-        Server.getCli().print("Requesting data...");
-        for(Sensor sensor : sensors.values()){
-            sensor.transmit("request");
-        }
-        Map<String, String> result = new HashMap<>();
-        Server.getCli().print("Collecting data");
+        Server.getCli().debugPrint("Requesting data...");
         for(String key : sensors.keySet()){
             Sensor sensor = sensors.get(key);
-            String data = sensor.receive();
+            try{
+                sensor.transmit("request");
+            }
+            catch(SocketException e){
+                Server.getCli().errorPrint("Sensor identified by id: "+key+" has disconnected.");
+                sensors.remove(key);
+                Server.getLog().add(new SensorDisconnectEvent(key, sensor.getAddress()));
+            }
+        }
+        Map<String, String> result = new HashMap<>();
+        Server.getCli().debugPrint("Collecting data");
+        for(String key : sensors.keySet()){
+            Sensor sensor = sensors.get(key);
+            String data = "";
+            try{
+                data = sensor.receive();
+            }
+            catch(SocketException e){
+                Server.getCli().errorPrint("Sensor identified by id: "+key+" has disconnected.");
+                sensors.remove(key);
+                Server.getLog().add(new SensorDisconnectEvent(key, sensor.getAddress()));
+            }
             result.put(key, data);
         }   
         return result;
+    }
+
+    public int getSensorCount() {
+        return sensors.size();
     }
     
 }

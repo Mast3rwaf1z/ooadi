@@ -14,7 +14,7 @@ arg2=1
 compile:
 	@$(jc) -cp $(classpath) server/Server.java -d bin
 
-server: compile
+server: init compile
 	@$(jr) -cp $(classpath) server.Server 
 
 sensor:

@@ -1,7 +1,12 @@
 package server;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Map;
+
+import server.events.SensorAddEvent;
 
 public class Server {
     private SensorManager sensorManager;
@@ -10,6 +15,7 @@ public class Server {
     static private Database db;
     static private CommandLineInterface commandLineInterface;
     static private Server server;
+    static private Thread mainThread = Thread.currentThread();
 
     private Server() throws IOException{
         sensorManager = new SensorManager();
@@ -40,15 +46,24 @@ public class Server {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                commandLineInterface.printException(e);
+                return;
             }
-            Map<String, String> data = sensorManager.collect();
-            commandLineInterface.print("Collected a set of data");
-            db.save(data);
+            if(sensorManager.getSensorCount() > 0){
+                Map<String, String> data = sensorManager.collect();
+                commandLineInterface.acceptPrint("Collected a set of data");
+                db.save(data);
+            }
         }
     }
 
     static public CommandLineInterface getCli(){
         return commandLineInterface;
+    }
+    static public Log getLog(){
+        return log;
+    }
+
+    static public void interrupt(){
+        mainThread.interrupt();
     }
 }

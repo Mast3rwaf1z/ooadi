@@ -26,4 +26,8 @@ public class Sensor {
         BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         return reader.readLine();
     }
+
+    public String getAddress() {
+        return address.getHostAddress();
+    }
 }
