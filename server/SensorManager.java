@@ -47,8 +47,19 @@ public class SensorManager implements Runnable {
         }
     }
     
-    public String[] collect(){
-        return null;
+    public Map<String, String> collect() throws IOException{
+        Server.getCli().print("Requesting data...");
+        for(Sensor sensor : sensors.values()){
+            sensor.transmit("request");
+        }
+        Map<String, String> result = new HashMap<>();
+        Server.getCli().print("Collecting data");
+        for(String key : sensors.keySet()){
+            Sensor sensor = sensors.get(key);
+            String data = sensor.receive();
+            result.put(key, data);
+        }   
+        return result;
     }
     
 }

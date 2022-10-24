@@ -16,5 +16,8 @@ s.send(bytes(id+"\n", "utf-8"))
 
 while True:
     request = s.recv(1024).decode("utf-8")
+    print("Server requested data")
     data = randint(-10, 10)
-    s.send(str(data))
+    s.send(str(data)+"\n")
+    print("sent data to the server")
+    sleep(1)

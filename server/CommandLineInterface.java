@@ -3,7 +3,7 @@ package server;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 
-public class CommandLineInterface {
+public class CommandLineInterface implements Runnable{
     private LineReader reader = LineReaderBuilder.builder().build();
     private String prompt = "> ";
 
