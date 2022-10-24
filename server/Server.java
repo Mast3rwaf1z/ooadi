@@ -76,4 +76,8 @@ public class Server {
         sensorManager.removeSensor(id);
 
     }
+
+    public static void clearSensors() {
+        sensorManager.clear();
+    }
 }

@@ -30,4 +30,12 @@ public class Sensor {
     public String getAddress() {
         return address.getHostAddress();
     }
+
+    public void close() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            Server.getCli().printException(e);
+        }
+    }
 }

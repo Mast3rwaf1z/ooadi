@@ -34,9 +34,14 @@ public class CommandLineInterface implements Runnable{
                     removeSensor(args.length > 1 ? args[1] : "-1");
                     break;
                 case "clear":
+                Lock lock = Server.getCollectLock();
+                lock.lock();
                     if(confirm("Are you sure you want to clear the database? (y/N) ")){
                         Server.getDatabase().clear();
+                        Server.clearSensors();
+                        acceptPrint("Successfully cleared database");
                     }
+                    lock.unlock();
                     break;
                 default:
                     reader.printAbove(RED+"No command was registered!"+BLACK+" commands: [add, remove, clear, exit]"+RESET);

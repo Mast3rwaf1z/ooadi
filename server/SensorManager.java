@@ -13,6 +13,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import server.events.SensorConnectEvent;
+import server.events.SensorConnectionRefusedEvent;
 import server.events.SensorDisconnectEvent;
 
 public class SensorManager implements Runnable {
@@ -43,7 +44,7 @@ public class SensorManager implements Runnable {
                 }
                 else{
                     Server.getCli().errorPrint("The id is invalid, cutting off the connection!");
-                    Server.getLog().add(new SensorDisconnectEvent(id, socket.getInetAddress().getHostAddress()));
+                    Server.getLog().add(new SensorConnectionRefusedEvent(id, socket.getInetAddress().getHostAddress()));
                     sensor.close();
                 }
             } catch (IOException e) {
@@ -97,8 +98,16 @@ public class SensorManager implements Runnable {
 
     public void removeSensor(String id) {
         collectLock.lock();
+        sensors.get(id).close();
         sensors.remove(id);
         collectLock.unlock();
+    }
+     
+    public void clear(){
+        for(Sensor sensor : sensors.values()){
+            sensor.close();
+        }
+        sensors = new HashMap<>();
     }
     
 }
