@@ -1,8 +1,5 @@
 package server.events;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 public class SensorRemoveEvent implements Event {
 
     private String id;

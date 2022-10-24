@@ -1,7 +1,5 @@
 package server.events;
 
-import server.Event;
-
 public class ClientConnectEvent implements Event {
 
     @Override

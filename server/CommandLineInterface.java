@@ -1,7 +1,6 @@
 package server;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -9,54 +8,60 @@ import org.jline.reader.LineReaderBuilder;
 import server.events.SensorAddEvent;
 import server.events.SensorRemoveEvent;
 
-public class CommandLineInterface implements Runnable{public static final String RESET = "\u001B[0m";
-    private static final String BLACK = "\u001B[30;1m";
-    private static final String RED = "\u001B[31m";
-    private static final String GREEN = "\u001B[32m";
-    private static final String YELLOW = "\u001B[33m";
-    private static final String BLUE = "\u001B[34m";
-    private static final String PURPLE = "\u001B[35m";
-    private static final String CYAN = "\u001B[36m";
-    private static final String WHITE = "\u001B[37m";
+public class CommandLineInterface implements Runnable{
+    private static String os = System.getProperty("os.name");
+    private static final String RESET   = os.equals("Linux") ? "\u001B[0m" : "";
+    private static final String BLACK   = os.equals("Linux") ? "\u001B[30;1m" : "";
+    private static final String RED     = os.equals("Linux") ? "\u001B[31m" : "";
+    private static final String GREEN   = os.equals("Linux") ? "\u001B[32m" : "";
+    private static final String CYAN    = os.equals("Linux") ? "\u001B[36m" : "";
 
     private LineReader reader = LineReaderBuilder.builder().build();
     private String prompt = "> ";
 
+    public CommandLineInterface(){
+    }
+
     public void run() {
-        for(String line = ""; !line.equals("exit"); line = reader.readLine(prompt)){
+        for(String line = ""; !line.equals("exit"); line = reader.readLine(CYAN+prompt+RESET)){
             String[] args = line.split(" ");
             switch(args[0]){
                 case "": break;
                 case "add":
-                    addSensor(args.length == 3 ? args[2] : "localhost", args.length > 1 ? args[1] : "0");
+                    addSensor(args.length > 1 ? args[1] : "-1");
                     break;
                 case "remove":
-                    removeSensor(args.length > 1 ? args[1] : "0");
+                    removeSensor(args.length > 1 ? args[1] : "-1");
+                    break;
+                case "clear":
+                    if(confirm("Are you sure you want to clear the database? (y/N) ")){
+                        Server.getDatabase().clear();
+                    }
                     break;
                 default:
-                    reader.printAbove(RED+"No command was registered!"+BLACK+" commands: [add, remove, exit]"+RESET);
+                    reader.printAbove(RED+"No command was registered!"+BLACK+" commands: [add, remove, clear, exit]"+RESET);
                     break;
                 
             }
 
         }
+        System.exit(0);
     }
 
-    private void addSensor(String addr, String id){
-        try {
-            Server.getLog().add(new SensorAddEvent(id, addr));
-        } catch (IOException e) {
-            printException(e);
-        }
+    private void addSensor(String id){
+        Server.getLog().add(new SensorAddEvent(id));
+        Lock lock = Server.getCollectLock();
+        lock.lock();
+        Server.getDatabase().addEntry(id);
+        lock.unlock();
+        
 
     }
 
     private void removeSensor(String id){
-        try {
-            Server.getLog().add(new SensorRemoveEvent(id));
-        } catch (IOException e) {
-            printException(e);
-        }
+        Server.getLog().add(new SensorRemoveEvent(id));
+        Server.removeSensor(id);
+        Server.getDatabase().removeEntry(id);
         
     }
 
@@ -81,6 +86,11 @@ public class CommandLineInterface implements Runnable{public static final String
         for(StackTraceElement element : e.getStackTrace()){
             reader.printAbove("\t"+element.toString());
         }
+    }
+
+    public boolean confirm(String prompt){
+        String result = reader.readLine(prompt);
+        return result.equalsIgnoreCase("y") || result.equalsIgnoreCase("yes");
     }
     
 }

@@ -1,16 +1,13 @@
 package server;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 
-import server.events.SensorAddEvent;
 
 public class Server {
-    private SensorManager sensorManager;
-    private RequestHandler requestHandler;
+    static private SensorManager sensorManager;
+    static private RequestHandler requestHandler;
     static private Log log;
     static private Database db;
     static private CommandLineInterface commandLineInterface;
@@ -28,7 +25,7 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
         server = new Server();
-        db.clear();
+        //db.clear();
         log.clear();
         server.run();
     }
@@ -63,7 +60,20 @@ public class Server {
         return log;
     }
 
+    static public Database getDatabase(){
+        return db;
+    }
+
     static public void interrupt(){
         mainThread.interrupt();
+    }
+
+    public static Lock getCollectLock(){
+        return sensorManager.getCollectLock();
+    }
+
+    public static void removeSensor(String id) {
+        sensorManager.removeSensor(id);
+
     }
 }

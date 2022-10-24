@@ -8,6 +8,7 @@ public class RequestHandler implements Runnable{
 
     @Override
     public void run() {
+        clients.size();//TODO: remove later, just to remove warnings
         
     }
     

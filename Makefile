@@ -14,13 +14,13 @@ arg2=1
 compile:
 	@$(jc) -cp $(classpath) server/Server.java -d bin
 
-server: init compile
+server: compile
 	@$(jr) -cp $(classpath) server.Server 
 
 sensor:
 	@$(pr) sensor.py $(arg1) $(arg2)
 
-run: init compile
+run: compile
 	@echo "assuming this is running on Arch Linux with the following packages installed:"
 	@echo "konsole, screen, java, python3.10"
 	@echo "the running program is running detached using screen. They can be attached to by viewing the list of virtual terminals with 'screen -list' and can be attached to with 'screen -r <id>'"

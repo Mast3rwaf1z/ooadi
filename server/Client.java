@@ -5,7 +5,7 @@ public class Client implements Runnable{
 
     @Override
     public void run() {
-        
+        address.toString(); //TODO: remove later, just removing warnings
     }
 
     public void transmit(byte[] data){
