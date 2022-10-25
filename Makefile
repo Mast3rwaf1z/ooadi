@@ -3,13 +3,13 @@ jr = java
 pr = python3.10
 detached = screen -dm
 visualize = konsole -e
-classpath = .:libs/jline-3.5.1.jar:bin
+classpath = .:libs/*:bin
 
 sensorcount = 4
 sensors = $(shell seq -s " " $(sensorcount))
 
-arg1=0
-arg2=localhost
+arg1=localhost
+arg2=1
 
 compile:
 	@$(jc) -cp $(classpath) server/Server.java -d bin
@@ -25,4 +25,15 @@ run: compile
 	@echo "konsole, screen, java, python3.10"
 	@echo "the running program is running detached using screen. They can be attached to by viewing the list of virtual terminals with 'screen -list' and can be attached to with 'screen -r <id>'"
 	@$(detached) $(visualize) $(jr) -cp $(classpath) server.Server
-	@$(foreach i, $(sensors), $(detached) $(visualize) $(pr) sensor.py $(i) localhost;) 
+	@$(foreach i, $(sensors), $(detached) $(visualize) $(pr) sensor.py $(arg1) $(i);) 
+
+init: clean
+	@echo '{"sensors":{"1":{}, "2":{}, "3":{}, "4":{}}, "users":{"alice":"test", "bob":"test2"}}' > database.json
+	@mkdir -p logs
+	@mkdir -p bin
+	@touch logs/log.log
+
+clean:
+	@rm -rf bin
+	@rm -rf logs
+	@rm -rf database.json
