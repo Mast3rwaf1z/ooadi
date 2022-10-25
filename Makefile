@@ -3,7 +3,7 @@ jr = java
 pr = python3.10
 detached = screen -dm
 visualize = konsole -e
-classpath = .:libs/*:bin
+classpath = server/src:server/lib/*:server/bin
 
 sensorcount = 4
 sensors = $(shell seq -s " " $(sensorcount))
@@ -12,13 +12,16 @@ arg1=localhost
 arg2=1
 
 compile:
-	@$(jc) -cp $(classpath) server/Server.java -d bin
+	@$(jc) -cp $(classpath) server/src/server/Server.java -d server/bin
 
 server: compile
 	@$(jr) -cp $(classpath) server.Server 
 
 sensor:
-	@$(pr) sensor.py $(arg1) $(arg2)
+	@$(pr) sensor/sensor.py $(arg1) $(arg2)
+
+client:
+	@$(pr) client/client_stub.py
 
 run: compile
 	@echo "assuming this is running on Arch Linux with the following packages installed:"
@@ -28,12 +31,10 @@ run: compile
 	@$(foreach i, $(sensors), $(detached) $(visualize) $(pr) sensor.py $(arg1) $(i);) 
 
 init: clean
-	@echo '{"sensors":{"1":{}, "2":{}, "3":{}, "4":{}}, "users":{"alice":"test", "bob":"test2"}}' > database.json
-	@mkdir -p logs
-	@mkdir -p bin
-	@touch logs/log.log
+	@mkdir -p server/files
+	@echo '{"sensors":{"1":{}, "2":{}, "3":{}, "4":{}}, "users":{"alice":"test", "bob":"test2"}}' > server/files/database.json
+	@touch server/files/log.log
 
 clean:
-	@rm -rf bin
-	@rm -rf logs
-	@rm -rf database.json
+	@rm -rf server/files
+	@rm -rf server/bin

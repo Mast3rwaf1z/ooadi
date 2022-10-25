@@ -26,7 +26,7 @@ public class Database {
 
     private void loadDatabase(){
         try {
-            json = new JSONObject(new JSONTokener(new FileInputStream(new File("database.json"))));
+            json = new JSONObject(new JSONTokener(new FileInputStream(new File("server/files/database.json"))));
         } catch (IOException e) {
             System.out.println("Database file was not found, please run `make init`");
             System.exit(1);

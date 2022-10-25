@@ -8,7 +8,7 @@ import java.io.IOException;
 import server.events.Event;
 
 public class Log{
-    private String path = "logs/log.log";
+    private String path = "server/files/log.log";
     
     public void add(Event event){
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File(path), true))){

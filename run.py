@@ -14,4 +14,4 @@ for id in ids:
     system('tmux split-window -h')
     system(f'tmux send "make sensor arg1={server_ip} arg2={id}" ENTER')
 
-system("/usr/bin/tmux attach")
+system("tmux attach")
