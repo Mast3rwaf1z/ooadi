@@ -11,6 +11,8 @@ sensors = $(shell seq -s " " $(sensorcount))
 arg1=localhost
 arg2=1
 
+.PHONY: clean sensor sensor client run 
+
 compile:
 	@$(jc) -cp $(classpath) server/src/server/Server.java -d server/bin
 

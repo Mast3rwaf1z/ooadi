@@ -1,6 +1,11 @@
+#!/bin/python3.10
 from sys import argv
 from os import system
 from time import sleep
+
+if argv[1] == "exit":
+    system("tmux kill-session")
+    exit(0)
 
 server_ip = "localhost"
 ids = [i for i in range(1, int(argv[1]) + 1)]
