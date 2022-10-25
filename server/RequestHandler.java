@@ -49,6 +49,7 @@ public class RequestHandler implements Runnable{
                 }
 
                 //TODO: make some login mechanism, everything after this line is if the client has been accepted
+                Server.getCli().acceptPrint("Client successfully connected!");
                 Server.getLog().add(new ClientLoginEvent(client.getInetAddress().getHostAddress(), id));
                 clients.put(id, new Client(client, id));
                 
