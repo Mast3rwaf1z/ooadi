@@ -98,8 +98,10 @@ public class SensorManager implements Runnable {
 
     public void removeSensor(String id) {
         collectLock.lock();
-        sensors.get(id).close();
-        sensors.remove(id);
+        if(sensors.containsKey(id)){
+            sensors.get(id).close();
+            sensors.remove(id);
+        }
         collectLock.unlock();
     }
      

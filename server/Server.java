@@ -41,7 +41,7 @@ public class Server {
         commandLineInterfaceThread.start();
         while(commandLineInterfaceThread.isAlive()){
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 return;
             }

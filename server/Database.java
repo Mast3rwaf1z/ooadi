@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,13 +47,7 @@ public class Database {
         JSONObject sensors;
         sensors = json.getJSONObject("sensors");
         for(String key : data.keySet()){
-            int sequence_number = 0;
-            for(String inner_key : sensors.getJSONObject(key).keySet()){
-                if(Integer.parseInt(inner_key) > sequence_number){
-                    sequence_number = Integer.parseInt(inner_key);
-                }
-            }
-            sensors.getJSONObject(key).put(String.valueOf(sequence_number+1), data.get(key));
+            sensors.getJSONObject(key).put(timestamp(), data.get(key));
         }
         json.put("sensors", sensors);
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File("database.json")))){
@@ -74,6 +70,9 @@ public class Database {
     }
 
     public void addEntry(String id) {
+        if(json.getJSONObject("sensors").has(id)){
+            return;
+        }
         JSONObject sensors = json.getJSONObject("sensors");
         sensors.put(id, new JSONObject());
         json.put("sensors", sensors);
@@ -101,5 +100,9 @@ public class Database {
             return null;
         }
         return json.getJSONObject("users").getString(username);
+    }
+    private String timestamp(){
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss"));
+
     }
 }
