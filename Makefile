@@ -27,9 +27,8 @@ run: compile
 	@$(detached) $(visualize) $(jr) -cp $(classpath) server.Server
 	@$(foreach i, $(sensors), $(detached) $(visualize) $(pr) sensor.py $(arg1) $(i);) 
 
-init:
-	@touch database.json
-	@echo '{"sensors":{"1":{}, "2":{}, "3":{}, "4":{}}}' > database.json
+init: clean
+	@echo '{"sensors":{"1":{}, "2":{}, "3":{}, "4":{}}, "users":{"alice":"test", "bob":"test2"}}' > database.json
 	@mkdir -p logs
 	@mkdir -p bin
 	@touch logs/log.log

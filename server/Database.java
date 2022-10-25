@@ -34,7 +34,7 @@ public class Database {
 
     public List<String> getIds(){
         List<String> result = new ArrayList<>();
-        JSONObject sensors = (JSONObject)json.get("sensors");
+        JSONObject sensors = json.getJSONObject("sensors");
         for(String key : sensors.keySet()){
             result.add(key);
         }
@@ -43,17 +43,17 @@ public class Database {
 
     public void save(Map<String, String> data) throws IOException{
         JSONObject sensors;
-        sensors = (JSONObject)json.get("sensors");
+        sensors = json.getJSONObject("sensors");
         for(String key : data.keySet()){
             int sequence_number = 0;
-            for(Object inner_key : ((JSONObject)sensors.get(key)).keySet()){
-                if(Integer.parseInt((String)inner_key) > sequence_number){
-                    sequence_number = Integer.parseInt((String)inner_key);
+            for(String inner_key : sensors.getJSONObject(key).keySet()){
+                if(Integer.parseInt(inner_key) > sequence_number){
+                    sequence_number = Integer.parseInt(inner_key);
                 }
             }
-            ((JSONObject)sensors.get(key)).put(String.valueOf(sequence_number+1), data.get(key));
+            sensors.getJSONObject(key).put(String.valueOf(sequence_number+1), data.get(key));
         }
-        json.put("sensors", (JSONObject)sensors);
+        json.put("sensors", sensors);
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File("database.json")))){
             writer.write(json.toString(4));
         }
@@ -74,7 +74,7 @@ public class Database {
     }
 
     public void addEntry(String id) {
-        JSONObject sensors = (JSONObject) json.get("sensors");
+        JSONObject sensors = json.getJSONObject("sensors");
         sensors.put(id, new JSONObject());
         json.put("sensors", sensors);
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File("database.json")))){
@@ -86,7 +86,7 @@ public class Database {
     }
 
     public void removeEntry(String id) {
-        JSONObject sensors = (JSONObject) json.get("sensors");
+        JSONObject sensors = json.getJSONObject("sensors");
         sensors.remove(id);
         json.put("sensors", sensors);
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File("database.json")))){
@@ -95,5 +95,11 @@ public class Database {
         catch(IOException e){
             Server.getCli().printException(e);
         }
+    }
+    public String getLogin(String username){
+        if(!json.getJSONObject("users").has(username)){
+            return null;
+        }
+        return json.getJSONObject("users").getString(username);
     }
 }
