@@ -19,6 +19,7 @@ import server.events.DatabaseClearEvent;
 
 public class Database {
     private JSONObject json;
+    private String path = "server/files/database.json";
 
     public Database(){
         loadDatabase();
@@ -26,7 +27,7 @@ public class Database {
 
     private void loadDatabase(){
         try {
-            json = new JSONObject(new JSONTokener(new FileInputStream(new File("server/files/database.json"))));
+            json = new JSONObject(new JSONTokener(new FileInputStream(new File(path))));
         } catch (IOException e) {
             System.out.println("Database file was not found, please run `make init`");
             System.exit(1);
@@ -50,7 +51,7 @@ public class Database {
             sensors.getJSONObject(key).put(timestamp(), data.get(key));
         }
         json.put("sensors", sensors);
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File("database.json")))){
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File(path)))){
             writer.write(json.toString(4));
         }
     }
@@ -60,7 +61,7 @@ public class Database {
         Server.getLog().add(new DatabaseClearEvent());
         Map<String, JSONObject> sensors = new HashMap<>();
         json.put("sensors", sensors);
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File("database.json")))){
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File(path)))){
             writer.write(json.toString(4));
         }
         catch(IOException e){
@@ -76,7 +77,7 @@ public class Database {
         JSONObject sensors = json.getJSONObject("sensors");
         sensors.put(id, new JSONObject());
         json.put("sensors", sensors);
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File("database.json")))){
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File(path)))){
             writer.write(json.toString(4));
         }
         catch(IOException e){
@@ -88,7 +89,7 @@ public class Database {
         JSONObject sensors = json.getJSONObject("sensors");
         sensors.remove(id);
         json.put("sensors", sensors);
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File("database.json")))){
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File(path)))){
             writer.write(json.toString(4));
         }
         catch(IOException e){
