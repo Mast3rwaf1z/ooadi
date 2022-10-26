@@ -1,5 +1,6 @@
 package server;
 
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
 import org.jline.reader.LineReader;
@@ -43,8 +44,37 @@ public class CommandLineInterface implements Runnable{
                     }
                     lock.unlock();
                     break;
+                case "adduser":
+                    if(args.length == 3){
+                        Server.getDatabase().addUser(args[1], args[2]);
+                        acceptPrint("Successfully added user: "+args[1]);
+                    }
+                    else{
+                        errorPrint("Error, not enough arguments: [adduser <username> <password>]");
+                    }
+                    break;
+                case "removeuser":
+                    if(args.length == 2){
+                        Server.getDatabase().removeUser(args[1]);
+                        acceptPrint("Successfully removed user: "+args[1]);
+                    }
+                    else{
+                        errorPrint("Error, not enough arguments: [removeuser <username>]");
+                    }
+                    break;
+                case "showdata":
+                    if(args.length == 2){
+                        Map<String, String> data = Server.getDatabase().getSensorData(args[1]);
+                        for(String key : data.keySet()){
+                            reader.printAbove(CYAN+key+": "+BLACK+data.get(key)+RESET);
+                        }
+                    }
+                    else{
+                        errorPrint("Error, not enough arguments: [showdata <sensorid>");
+                    }
+                    break;
                 default:
-                    reader.printAbove(RED+"No command was registered!"+BLACK+" commands: [add, remove, clear, exit]"+RESET);
+                    reader.printAbove(RED+"No command was registered!"+BLACK+" commands: [add, remove, clear, adduser, removeuser, showdata, exit]"+RESET);
                     break;
                 
             }
