@@ -1,5 +1,6 @@
 package server;
 
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 
 import org.jline.reader.LineReader;
@@ -30,12 +31,17 @@ public class CommandLineInterface implements Runnable{
                 case "add":
                     addSensor(args.length > 1 ? args[1] : "-1");
                     break;
+                case "addmore":
+                    int amount = args.length > 1 ? Integer.parseInt(args[1]) : 10;
+                    for(int i = 0; i < amount; i++){
+                        addSensor(UUID.randomUUID().toString().split("-")[0]);
+                    }
                 case "remove":
                     removeSensor(args.length > 1 ? args[1] : "-1");
                     break;
                 case "clear":
-                Lock lock = Server.getCollectLock();
-                lock.lock();
+                    Lock lock = Server.getCollectLock();
+                    lock.lock();
                     if(confirm("Are you sure you want to clear the database? (y/N) ")){
                         Server.getDatabase().clear();
                         Server.clearSensors();
