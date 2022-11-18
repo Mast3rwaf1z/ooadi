@@ -51,28 +51,42 @@ def main():
     def myClick():
         username = usernameTextBox.get()
         password = passwordTextBox.get()
+
         print(username)
         print(password)
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('localhost', 8000))
-        s.send(f'login {username} {password}\n'.encode('utf-8'))
-
-        #recv = s.recv(1024).decode("utf-8")
-        #if recv == "failed":
-            #print("Failed to log in")
-            #exit(0)
-
-        if username == acc.getUsername() and password == acc.getPassword():
-            myLabel.configure(text="Log in successful", fg='green', bg='#84A9C0')
-            myLabel.place(x=150, y=150)
-            window.after(2000, frame1.destroy)
-            log_in['state'] = DISABLED
-            exit_button['state'] = DISABLED
-            window.after(2000, lambda: MainMenu(window))
+        if not username or not password:
+            myLabel.configure(text="Please enter your username and password", fg='red', bg='#84A9C0')
+            myLabel.place(x=110, y=150)
         else:
-            myLabel.configure(text="Log in unsuccessful", fg='red', bg='#84A9C0')
-            myLabel.place(x=150, y=150)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect(('localhost', 8000))
+            s.send(f'login {username} {password}\n'.encode('utf-8'))
+
+            recv = s.recv(1024).decode("utf-8")
+
+            if recv == "failed":
+                print("Failed to log in")
+                myLabel.configure(text="Log in unsuccessful", fg='red', bg='#84A9C0')
+                myLabel.place(x=150, y=150)
+            else:
+                myLabel.configure(text="Log in successful", fg='green', bg='#84A9C0')
+                myLabel.place(x=150, y=150)
+                window.after(2000, frame1.destroy)
+                log_in['state'] = DISABLED
+                exit_button['state'] = DISABLED
+                window.after(2000, lambda: MainMenu(window, s))
+
+        #if username == acc.getUsername() and password == acc.getPassword():
+        #    myLabel.configure(text="Log in successful", fg='green', bg='#84A9C0')
+        #    myLabel.place(x=150, y=150)
+        #    window.after(2000, frame1.destroy)
+        #    log_in['state'] = DISABLED
+        #    exit_button['state'] = DISABLED
+        #    window.after(2000, lambda: MainMenu(window))
+        #else:
+        #    myLabel.configure(text="Log in unsuccessful", fg='red', bg='#84A9C0')
+        #    myLabel.place(x=150, y=150)
 
     # log in button
     log_in = Button(frame1, text="Log in", command=myClick, bg='#84A9C0')
@@ -84,7 +98,7 @@ def main():
     window.mainloop()
 
 
-def MainMenu(window):
+def MainMenu(window, s):
     # new canvas
     frameMenu = Frame(window, width=600, height=600)
     frameMenu.configure(bg='#84A9C0')
@@ -159,8 +173,6 @@ def MainMenu(window):
         saveButton = Button(frameShow, text="Save", command=saveIt, bg='#84A9C0')
         saveButton.place(x=500, y=550)
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('localhost', 8000))
         s.send('getids\n'.encode('utf-8'))
 
         #add item to list box
@@ -196,7 +208,11 @@ def MainMenu(window):
     frameWeatherInfo = Frame(frameMenu, width=400, height=400)
     frameWeatherInfo.place(x=100, y=150)
 
-    exitMainButton = Button(frameMenu, text="Log out", bg='#84A9C0', command=window.quit)
+    def exitClick():
+        s.close()
+        window.quit()
+
+    exitMainButton = Button(frameMenu, text="Log out", bg='#84A9C0', command=exitClick)
     exitMainButton.place(x=25, y=25)
 
 
