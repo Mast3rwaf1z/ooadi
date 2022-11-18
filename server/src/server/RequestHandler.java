@@ -1,8 +1,10 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -41,14 +43,20 @@ public class RequestHandler implements Runnable{
                     continue;
                 }
 
-                if(!login(request[1], request[2])){ //TODO: this if statement is for if the client has failed a login attempt
+                if(!login(request[1], request[2])){
                     Server.getCli().errorPrint("Client failed to log in");
                     Server.getLog().add(new ClientLoginFailedEvent(client.getInetAddress().getHostAddress(), id));
+                    try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()))){
+                        writer.write("failed");
+                        writer.flush();
+                    }
                     client.close();
                     continue;
                 }
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+                writer.write("success");
+                writer.flush();
 
-                //TODO: make some login mechanism, everything after this line is if the client has been accepted
                 Server.getCli().acceptPrint("Client successfully connected!");
                 Server.getLog().add(new ClientLoginEvent(client.getInetAddress().getHostAddress(), id));
                 clients.put(id, new Client(client, id));
