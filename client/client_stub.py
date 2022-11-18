@@ -2,8 +2,13 @@ import socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('localhost', 8000))
 s.settimeout(5)
-s.send('login alice test\n'.encode('utf-8'))
+s.send(f'login {input("enter username: ")} {input("enter password: ")}\n'.encode('utf-8'))
 inp = ""
+recv = s.recv(1024).decode("utf-8")
+if recv == "failed":
+    print("Failed to log in")
+    exit(0)
+print("Connected!")
 while True:
     inp = input("> ")
     s.send(f'{inp}\n'.encode('utf-8'))
