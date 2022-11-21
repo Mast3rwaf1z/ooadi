@@ -77,14 +77,14 @@ def main():
                 exit_button['state'] = DISABLED
                 window.after(2000, lambda: MainMenu(window, s))
 
-        #if username == acc.getUsername() and password == acc.getPassword():
+        # if username == acc.getUsername() and password == acc.getPassword():
         #    myLabel.configure(text="Log in successful", fg='green', bg='#84A9C0')
         #    myLabel.place(x=150, y=150)
         #    window.after(2000, frame1.destroy)
         #    log_in['state'] = DISABLED
         #    exit_button['state'] = DISABLED
         #    window.after(2000, lambda: MainMenu(window))
-        #else:
+        # else:
         #    myLabel.configure(text="Log in unsuccessful", fg='red', bg='#84A9C0')
         #    myLabel.place(x=150, y=150)
 
@@ -104,10 +104,24 @@ def MainMenu(window, s):
     frameMenu.configure(bg='#84A9C0')
     frameMenu.place(x=0, y=0)
 
+    frameWeatherInfo = Frame(frameMenu, width=400, height=400)
+    frameWeatherInfo.place(x=100, y=150)
+
     welcomeLabel = Label(text="Welcome to sensor server", bg='#84A9C0')
     welcomeLabel.place(x=200, y=25)
 
+    s.send('getdata 1 1\n'.encode('utf-8'))
+
+    recv = s.recv(1024).decode("utf-8")
+    response = recv[:recv.find(":")]
+    data = recv[recv.find(":") + 1:]
+
+    sensorLabel = Label(frameWeatherInfo, text=data)
+    sensorLabel.place(x=100, y=100)
+
     def showClick():
+        s.send('getids\n'.encode('utf-8'))
+
         frameShow = Frame(window, width=600, height=600, bg='#84A9C0')
         frameShow.place(x=0, y=0)
 
@@ -126,7 +140,7 @@ def MainMenu(window, s):
         exitButton = Button(frameShow, text="Exit", bg='#84A9C0', command=frameShow.destroy)
         exitButton.place(x=50, y=550)
 
-        #list box
+        # list box
         showListBox = Listbox(frameSShow, width=250, height=350)
         showListBox.place(x=0, y=0)
 
@@ -168,23 +182,24 @@ def MainMenu(window, s):
             toHideButton['state'] = DISABLED
             window.after(2000, frameShow.destroy)
 
-            #Saves the progress
+            # Saves the progress
 
         saveButton = Button(frameShow, text="Save", command=saveIt, bg='#84A9C0')
         saveButton.place(x=500, y=550)
 
-        s.send('getids\n'.encode('utf-8'))
+        recv = s.recv(1024).decode("utf-8")
+        data = recv[recv.find(":") + 1:]
+        print(data)
 
-        #add item to list box
-        showListBox.insert(END, "an item")
-        showListBox.insert(END, "an  different item")
+        # add item to list box
+        #showListBox.insert(END, "an item")
+        #showListBox.insert(END, "an  different item")
 
-        #Add list of items
-        a_list = ["one", "two", "three"]
+        # Add list of items
+        #a_list = ["one", "two", "three"]
 
-        for item in a_list:
+        for item in data:
             showListBox.insert(END, item)
-
 
     showButton = Button(frameMenu, text="Show", bg='#84A9C0', command=showClick)
     showButton.place(x=100, y=100)
@@ -204,9 +219,6 @@ def MainMenu(window, s):
 
     hideButton = Button(frameMenu, text="Hide", bg='#84A9C0', command=hideClick)
     hideButton.place(x=450, y=100)
-
-    frameWeatherInfo = Frame(frameMenu, width=400, height=400)
-    frameWeatherInfo.place(x=100, y=150)
 
     def exitClick():
         s.close()
