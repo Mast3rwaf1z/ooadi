@@ -109,5 +109,36 @@ public class Database {
 
     public String getMasterPassword() {
         return json.getString("password");
+        
+    public void addUser(String username, String password) {
+        JSONObject users = json.getJSONObject("users");
+        users.put(username, password);
+        json.put("users", users);
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File(path)))){
+            writer.write(json.toString(4));
+        }
+        catch(IOException e){
+            Server.getCli().printException(e);
+        }
+    }
+    public void removeUser(String username){
+        JSONObject users = json.getJSONObject("users");
+        users.remove(username);
+        json.put("users", users);
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File(path)))){
+            writer.write(json.toString(4));
+        }
+        catch(IOException e){
+            Server.getCli().printException(e);
+        }
+    }
+
+    public Map<String, String> getSensorData(String id) {
+        Map<String, String> result = new HashMap<>();
+        JSONObject sensor = json.getJSONObject("sensors").getJSONObject(id);
+        for(String key : sensor.keySet()){
+            result.put(key, sensor.getString(key));
+        }
+        return result;
     }
 }

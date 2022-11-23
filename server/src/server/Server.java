@@ -23,7 +23,7 @@ public class Server {
         
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException{
         server = new Server();
         //db.clear();
         //log.clear();
