@@ -109,6 +109,7 @@ public class Database {
 
     public String getMasterPassword() {
         return json.getString("password");
+    }
         
     public void addUser(String username, String password) {
         JSONObject users = json.getJSONObject("users");
