@@ -11,11 +11,11 @@ import server.events.SensorRemoveEvent;
 
 public class CommandLineInterface implements Runnable{
     private static String os = System.getProperty("os.name");
-    private static final String RESET   = os.equals("Linux") ? "\u001B[0m" : "";
-    private static final String BLACK   = os.equals("Linux") ? "\u001B[30;1m" : "";
-    private static final String RED     = os.equals("Linux") ? "\u001B[31m" : "";
-    private static final String GREEN   = os.equals("Linux") ? "\u001B[32m" : "";
-    private static final String CYAN    = os.equals("Linux") ? "\u001B[36m" : "";
+    private static final String RESET   = os.equals("Linux") ? "\u001B[0m"      : "";
+    private static final String BLACK   = os.equals("Linux") ? "\u001B[30;1m"   : "";
+    private static final String RED     = os.equals("Linux") ? "\u001B[31m"     : "";
+    private static final String GREEN   = os.equals("Linux") ? "\u001B[32m"     : "";
+    private static final String CYAN    = os.equals("Linux") ? "\u001B[36m"     : "";
 
     private LineReader reader = LineReaderBuilder.builder().build();
     private String prompt = "> ";
@@ -35,8 +35,8 @@ public class CommandLineInterface implements Runnable{
                     removeSensor(args.length > 1 ? args[1] : "-1");
                     break;
                 case "clear":
-                Lock lock = Server.getCollectLock();
-                lock.lock();
+                    Lock lock = Server.getCollectLock();
+                    lock.lock();
                     if(confirm("Are you sure you want to clear the database? (y/N) ")){
                         Server.getDatabase().clear();
                         Server.clearSensors();
