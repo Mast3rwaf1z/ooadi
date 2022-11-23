@@ -41,14 +41,13 @@ public class RequestHandler implements Runnable{
                     continue;
                 }
 
-                if(!login(request[1], request[2])){ //TODO: this if statement is for if the client has failed a login attempt
+                if(!login(request[1], request[2])){
                     Server.getCli().errorPrint("Client failed to log in");
                     Server.getLog().add(new ClientLoginFailedEvent(client.getInetAddress().getHostAddress(), id));
                     client.close();
                     continue;
                 }
 
-                //TODO: make some login mechanism, everything after this line is if the client has been accepted
                 Server.getCli().acceptPrint("Client successfully connected!");
                 Server.getLog().add(new ClientLoginEvent(client.getInetAddress().getHostAddress(), id));
                 clients.put(id, new Client(client, id));

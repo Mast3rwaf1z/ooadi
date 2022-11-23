@@ -9,9 +9,9 @@ sensorcount = 4
 sensors = $(shell seq -s " " $(sensorcount))
 
 arg1=localhost
-arg2=1
+arg2=
 
-.PHONY: clean sensor sensor client run 
+.PHONY: clean compile sensor server client run 
 
 compile:
 	@$(jc) -cp $(classpath) server/src/server/Server.java -d server/bin
@@ -34,7 +34,7 @@ run: compile
 
 init: clean
 	@mkdir -p server/files
-	@echo '{"sensors":{"1":{}, "2":{}, "3":{}, "4":{}}, "users":{"alice":"test", "bob":"test2"}}' > server/files/database.json
+	@echo '{"sensors":{}, "users":{"alice":"test", "bob":"test2"},"password":"test"}' > server/files/database.json
 	@touch server/files/log.log
 
 clean:

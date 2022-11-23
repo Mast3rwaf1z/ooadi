@@ -1,6 +1,5 @@
 package server;
 
-import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 
 import org.jline.reader.LineReader;
@@ -11,11 +10,11 @@ import server.events.SensorRemoveEvent;
 
 public class CommandLineInterface implements Runnable{
     private static String os = System.getProperty("os.name");
-    private static final String RESET   = os.equals("Linux") ? "\u001B[0m" : "";
-    private static final String BLACK   = os.equals("Linux") ? "\u001B[30;1m" : "";
-    private static final String RED     = os.equals("Linux") ? "\u001B[31m" : "";
-    private static final String GREEN   = os.equals("Linux") ? "\u001B[32m" : "";
-    private static final String CYAN    = os.equals("Linux") ? "\u001B[36m" : "";
+    private static final String RESET   = os.equals("Linux") ? "\u001B[0m"      : "";
+    private static final String BLACK   = os.equals("Linux") ? "\u001B[30;1m"   : "";
+    private static final String RED     = os.equals("Linux") ? "\u001B[31m"     : "";
+    private static final String GREEN   = os.equals("Linux") ? "\u001B[32m"     : "";
+    private static final String CYAN    = os.equals("Linux") ? "\u001B[36m"     : "";
 
     private LineReader reader = LineReaderBuilder.builder().build();
     private String prompt = "> ";
@@ -31,11 +30,6 @@ public class CommandLineInterface implements Runnable{
                 case "add":
                     addSensor(args.length > 1 ? args[1] : "-1");
                     break;
-                case "addmore":
-                    int amount = args.length > 1 ? Integer.parseInt(args[1]) : 10;
-                    for(int i = 0; i < amount; i++){
-                        addSensor(UUID.randomUUID().toString().split("-")[0]);
-                    }
                 case "remove":
                     removeSensor(args.length > 1 ? args[1] : "-1");
                     break;

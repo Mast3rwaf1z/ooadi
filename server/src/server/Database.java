@@ -106,4 +106,8 @@ public class Database {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss"));
 
     }
+
+    public String getMasterPassword() {
+        return json.getString("password");
+    }
 }

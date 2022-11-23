@@ -1,6 +1,6 @@
 package server.events;
 
-public class ClientSensorDataRequestEvent implements Event {
+public class ClientDataRequestEvent implements Event {
 
     @Override
     public String build() {

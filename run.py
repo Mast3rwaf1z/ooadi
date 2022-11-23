@@ -17,6 +17,6 @@ system('tmux send "make server" ENTER')
 sleep(2)
 for id in ids:
     system('tmux split-window -h')
-    system(f'tmux send "make sensor arg1={server_ip} arg2={id}" ENTER')
+    system(f'tmux send "make sensor arg1={server_ip}" ENTER')
 
 system("tmux attach")
