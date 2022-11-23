@@ -1,3 +1,4 @@
+import pickle
 from tkinter import *
 import socket
 
@@ -71,8 +72,49 @@ def log_in_frame(window):
 
 
 def MainMenu(window, s):
-    #id 2 3 4 don't work
-    id = 1
+
+    s.send('getids\n'.encode('utf-8'))
+
+    recv = s.recv(1024).decode("utf-8")
+    dataRec = recv[recv.find(":") + 1:]
+    ShowableData = dataRec.split(" ")
+    print(ShowableData)
+
+    # Create a variable
+    #myvar = [{'This': 'is', 'Example': 2}, 'of', 'serialisation', ['using', 'pickle']]
+    # Open a file and use dump()
+    #with open('file.pkl', 'wb') as file:
+        # A new file will be created
+        #pickle.dump(myvar, file)
+
+    with open('show.pkl', 'rb') as file:
+        showTest = pickle.load(file)
+        print(f"Show: {showTest}")
+
+    with open('file.pkl', 'rb') as file:
+        fileTest = pickle.load(file)
+        print(f"File: {fileTest}")
+
+    with open('hide.pkl', 'rb') as file:
+        hideTest = pickle.load(file)
+        print(f"Hide: {hideTest}")
+
+    showData = []
+    hideData = []
+
+    for item in showTest:
+        showData.append(item)
+
+    for item in hideTest:
+        hideData.append(item)
+
+    for item in fileTest:
+        showData.append(item)
+
+    showData = list(dict.fromkeys(showData))
+
+    #id 1 2 3 4
+    id = 4
     amount = 1
 
     # new canvas
@@ -125,8 +167,8 @@ def MainMenu(window, s):
         hideLabel = Label(frameShow, text="Hide", bg='#84A9C0')
         hideLabel.place(x=300, y=125)
 
-        exitButton = Button(frameShow, text="Exit", bg='#84A9C0', command=frameShow.destroy)
-        exitButton.place(x=50, y=550)
+        #exitButton = Button(frameShow, text="Exit", bg='#84A9C0', command=frameShow.destroy)
+        #exitButton.place(x=50, y=550)
 
         # list box
         showListBox = Listbox(frameSShow, width=250, height=350)
@@ -138,9 +180,22 @@ def MainMenu(window, s):
         errorLabel = Label(frameShow, text='', bg='#84A9C0')
         errorLabel.place(x=300, y=550)
 
+        #id list box -------------------------------------------
+
+        for item in showData:
+            showListBox.insert(END, item)
+
+        for item in hideData:
+            hideListBox.insert(END, item)
+        #------------------------------------------------------------------
+
         def hideIt():
             if len(showListBox.curselection()) != 0:
                 x = showListBox.get(showListBox.curselection())
+
+                hideData.append(x)
+                showData.remove(x)
+
                 hideListBox.insert(END, x)
                 errorLabel.configure(text='')
                 showListBox.delete(ANCHOR)
@@ -153,6 +208,10 @@ def MainMenu(window, s):
         def showIt():
             if len(hideListBox.curselection()) != 0:
                 x = hideListBox.get(hideListBox.curselection())
+
+                showData.append(x)
+                hideData.remove(x)
+
                 showListBox.insert(END, x)
                 errorLabel.configure(text='')
                 hideListBox.delete(ANCHOR)
@@ -165,25 +224,20 @@ def MainMenu(window, s):
         def saveIt():
             errorLabel.configure(text="Saved", fg='green', bg='#84A9C0')
             saveButton['state'] = DISABLED
-            exitButton['state'] = DISABLED
+            #exitButton['state'] = DISABLED
             toShowButton['state'] = DISABLED
             toHideButton['state'] = DISABLED
+
+            with open('show.pkl', 'wb') as file:
+                pickle.dump(showData, file)
+
+            with open('hide.pkl', 'wb') as file:
+                pickle.dump(hideData, file)
+
             window.after(2000, frameShow.destroy)
 
         saveButton = Button(frameShow, text="Save", command=saveIt, bg='#84A9C0')
         saveButton.place(x=500, y=550)
-
-        #id list box -------------------------------------------
-        s.send('getids\n'.encode('utf-8'))
-
-        recv = s.recv(1024).decode("utf-8")
-        data = recv[recv.find(":") + 1:]
-        splitData=data.split(" ")
-        print(splitData)
-
-        for item in splitData:
-            showListBox.insert(END, item)
-        #------------------------------------------------------------------
 
     showButton = Button(frameMenu, text="Show", bg='#84A9C0', command=showClick)
     showButton.place(x=100, y=100)
