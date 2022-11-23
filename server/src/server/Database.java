@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import server.events.DatabaseClearEvent;
+import server.events.SensorAddEvent;
 
 public class Database {
     private JSONObject json;
@@ -76,6 +77,7 @@ public class Database {
         }
         JSONObject sensors = json.getJSONObject("sensors");
         sensors.put(id, new JSONObject());
+        Server.getLog().add(new SensorAddEvent(id));
         json.put("sensors", sensors);
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File(path)))){
             writer.write(json.toString(4));

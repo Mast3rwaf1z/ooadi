@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import server.events.ClientDataRequestEvent;
 import server.events.ClientDisconnectEvent;
 import server.events.InvalidRequestEvent;
 
@@ -62,6 +63,7 @@ public class Client implements Runnable{
                                 }
                                 message+="\t\""+format.format(keys.get(keys.size()-Integer.parseInt(args[2])))+"\":\""+data_formatted.get(keys.get(keys.size()-Integer.parseInt(args[2])))+"\"\n}";
                                 transmit(message);
+                                Server.getLog().add(new ClientDataRequestEvent(args[1], address, args[2]));
                             }
                             else{
                                 Server.getCli().errorPrint("Error, invalid arguments, expected: [getdata <sensorid> <amount>]");

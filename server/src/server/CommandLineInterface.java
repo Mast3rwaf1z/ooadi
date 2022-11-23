@@ -6,7 +6,6 @@ import java.util.concurrent.locks.Lock;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 
-import server.events.SensorAddEvent;
 import server.events.SensorRemoveEvent;
 
 public class CommandLineInterface implements Runnable{
@@ -84,7 +83,6 @@ public class CommandLineInterface implements Runnable{
     }
 
     private void addSensor(String id){
-        Server.getLog().add(new SensorAddEvent(id));
         Lock lock = Server.getCollectLock();
         lock.lock();
         Server.getDatabase().addEntry(id);
