@@ -14,6 +14,7 @@ def window():
     window.mainloop()
 
 
+# Log in menu
 def log_in_frame(window):
     frame1 = Frame(window, width=500, height=200, bg='#84A9C0')
     frame1.place(x=50, y=200)
@@ -71,49 +72,15 @@ def log_in_frame(window):
     exit_button.place(x=50, y=150)
 
 
+# Main menu
 def MainMenu(window, s):
-
     s.send('getids\n'.encode('utf-8'))
 
     recv = s.recv(1024).decode("utf-8")
     dataRec = recv[recv.find(":") + 1:]
-    ShowableData = dataRec.split(" ")
-    print(ShowableData)
+    showableData = dataRec.split(" ")
 
-    # Create a variable
-    #myvar = [{'This': 'is', 'Example': 2}, 'of', 'serialisation', ['using', 'pickle']]
-    # Open a file and use dump()
-    #with open('file.pkl', 'wb') as file:
-        # A new file will be created
-        #pickle.dump(myvar, file)
-
-    with open('show.pkl', 'rb') as file:
-        showTest = pickle.load(file)
-        print(f"Show: {showTest}")
-
-    with open('file.pkl', 'rb') as file:
-        fileTest = pickle.load(file)
-        print(f"File: {fileTest}")
-
-    with open('hide.pkl', 'rb') as file:
-        hideTest = pickle.load(file)
-        print(f"Hide: {hideTest}")
-
-    showData = []
-    hideData = []
-
-    for item in showTest:
-        showData.append(item)
-
-    for item in hideTest:
-        hideData.append(item)
-
-    for item in fileTest:
-        showData.append(item)
-
-    showData = list(dict.fromkeys(showData))
-
-    #id 1 2 3 4
+    # id 1 2 3 4
     id = 4
     amount = 1
 
@@ -134,6 +101,7 @@ def MainMenu(window, s):
     idLabel = Label(frameWeatherInfo, text=f"{id} sensor:")
     idLabel.place(x=150, y=100)
 
+    # refreshes data gotten from server every 5 sec
     def getData():
         s.send(f'getdata {id} {amount}\n'.encode('utf-8'))
 
@@ -150,6 +118,7 @@ def MainMenu(window, s):
 
     getData()
 
+    # Opens the sensor list frame
     def showClick():
 
         frameShow = Frame(window, width=600, height=600, bg='#84A9C0')
@@ -167,8 +136,22 @@ def MainMenu(window, s):
         hideLabel = Label(frameShow, text="Hide", bg='#84A9C0')
         hideLabel.place(x=300, y=125)
 
-        #exitButton = Button(frameShow, text="Exit", bg='#84A9C0', command=frameShow.destroy)
-        #exitButton.place(x=50, y=550)
+        def exitShow():
+            #print("exit running")
+            #with open('hide.pkl', 'rb') as file:
+            #    hideData = pickle.load(file)
+
+            #s.send('getids\n'.encode('utf-8'))
+
+            #recv = s.recv(1024).decode("utf-8")
+            #dataRec = recv[recv.find(":") + 1:]
+            #showableData = dataRec.split(" ")
+            #print(showableData)
+
+            frameShow.destroy()
+
+        exitButton = Button(frameShow, text="Exit", bg='#84A9C0', command=exitShow)
+        exitButton.place(x=50, y=550)
 
         # list box
         showListBox = Listbox(frameSShow, width=250, height=350)
@@ -180,74 +163,110 @@ def MainMenu(window, s):
         errorLabel = Label(frameShow, text='', bg='#84A9C0')
         errorLabel.place(x=300, y=550)
 
-        #id list box -------------------------------------------
+        try:
+            with open('hide.pkl', 'rb') as file:
+                hideData = pickle.load(file)
+                #print(f"Hidden data: {hideData}")
+        except:
+            print("File is empty")
+            with open('hide.pkl', 'wb') as file:
+                print("file created")
 
-        for item in showData:
+        for i in hideData:
+            for j in showableData:
+                if i == j:
+                    showableData.remove(i)
+
+        #print(f"Showing data: {showableData}")
+
+        # id list box -------------------------------------------
+        try:
+            for item in hideData:
+                hideListBox.insert(END, item)
+        except:
+            print("hidelistbox is empty")
+
+        for item in showableData:
             showListBox.insert(END, item)
 
-        for item in hideData:
-            hideListBox.insert(END, item)
-        #------------------------------------------------------------------
+        # ------------------------------------------------------------------------------
 
+        # button command to hide a specific sensor
         def hideIt():
             if len(showListBox.curselection()) != 0:
                 x = showListBox.get(showListBox.curselection())
 
                 hideData.append(x)
-                showData.remove(x)
-
                 hideListBox.insert(END, x)
-                errorLabel.configure(text='')
+
+                showableData.remove(x)
                 showListBox.delete(ANCHOR)
+
+                errorLabel.configure(text='')
             else:
                 errorLabel.configure(text="Select an element first")
 
         toHideButton = Button(frameShow, text="Hide", command=hideIt, bg='#84A9C0')
         toHideButton.place(x=150, y=500)
 
+        # ------------------------------------------------------------------------------
+
+        # button command to show specific sensor
         def showIt():
             if len(hideListBox.curselection()) != 0:
                 x = hideListBox.get(hideListBox.curselection())
-
-                showData.append(x)
-                hideData.remove(x)
-
-                showListBox.insert(END, x)
                 errorLabel.configure(text='')
+
+                showableData.append(x)
+                showListBox.insert(END, x)
+
+                hideData.remove(x)
                 hideListBox.delete(ANCHOR)
+
             else:
                 errorLabel.configure(text="Select an element first")
 
         toShowButton = Button(frameShow, text="Show", command=showIt, bg='#84A9C0')
         toShowButton.place(x=400, y=500)
 
+        # ------------------------------------------------------------------------------
+
+        # save the changes of what censors are hidden
         def saveIt():
             errorLabel.configure(text="Saved", fg='green', bg='#84A9C0')
             saveButton['state'] = DISABLED
-            #exitButton['state'] = DISABLED
+            exitButton['state'] = DISABLED
             toShowButton['state'] = DISABLED
             toHideButton['state'] = DISABLED
 
-            with open('show.pkl', 'wb') as file:
-                pickle.dump(showData, file)
+            print(f"Hidden data saved: {hideData}")
+            print(f"Showing data saved: {showableData}")
 
             with open('hide.pkl', 'wb') as file:
                 pickle.dump(hideData, file)
+
 
             window.after(2000, frameShow.destroy)
 
         saveButton = Button(frameShow, text="Save", command=saveIt, bg='#84A9C0')
         saveButton.place(x=500, y=550)
 
+    # ------------------------------------------------------------------------------
+
     showButton = Button(frameMenu, text="Show", bg='#84A9C0', command=showClick)
     showButton.place(x=100, y=100)
 
+    # ------------------------------------------------------------------------------
+
+    # Exit button command
     def exitClick():
         s.close()
         window.quit()
 
     exitMainButton = Button(frameMenu, text="Log out", bg='#84A9C0', command=exitClick)
     exitMainButton.place(x=25, y=25)
+
+    # ------------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
