@@ -171,6 +171,7 @@ def MainMenu(window, s):
             print("File is empty")
             with open('hide.pkl', 'wb') as file:
                 print("file created")
+                hideData = []
 
         for i in hideData:
             for j in showableData:
