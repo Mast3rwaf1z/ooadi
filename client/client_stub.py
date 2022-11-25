@@ -24,6 +24,8 @@ while True:
                 print(data)
             case "getidsreply":
                 print(data)
+            case _:
+                print(recv)
     except TimeoutError as e:
         print(f"timed out, command [{inp}] was probably invalid")
 s.close()

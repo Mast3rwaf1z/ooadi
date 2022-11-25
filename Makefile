@@ -14,6 +14,9 @@ arg2=
 .PHONY: clean compile sensor server client run 
 
 compile:
+	@echo "compiling..."
+	@rm server/bin/server/*.class
+	@rm server/bin/server/events/*.class
 	@$(jc) -cp $(classpath) server/src/server/Server.java -d server/bin
 
 server: compile
