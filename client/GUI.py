@@ -151,7 +151,7 @@ def MainMenu(window, s):
         sensorLabel.configure(text=cleanData)
         frameWeatherInfo.after(5000, getData)
 
-    #won't work
+    # won't work
     def getData():
         s.send(f'getdata {everyID[counter]} {amount}\n'.encode('utf-8'))
 
@@ -174,7 +174,6 @@ def MainMenu(window, s):
     nextButton = Button(frameMenu, text="Next", bg='#84A9C0', command=goNext)
     nextButton.place(x=270, y=100)
 
-
     welcomeLabel = Label(text="Welcome to sensor server", bg='#84A9C0')
     welcomeLabel.place(x=200, y=25)
 
@@ -195,9 +194,9 @@ def MainMenu(window, s):
 
     # ------------------------------------------------------------------------------
 
-
-
     # Opens the sensor list frame
+
+
 def showClick(s, window, frameMenu):
     print("refreshed show menu")
 
@@ -317,6 +316,7 @@ def showClick(s, window, frameMenu):
 
     saveButton = Button(frameShow, text="Save", command=saveIt, bg='#84A9C0')
     saveButton.place(x=500, y=550)
+
 
 if __name__ == "__main__":
     window()
