@@ -16,7 +16,6 @@ class GUI():
     def plot(self):
         print("what")
 
-
     def window(self):
         # This has to be between here and the first call to ServerHandler.login
         # Otherwise the socket will just not send anything
@@ -57,17 +56,13 @@ class GUI():
             username = usernameTextBox.get()
             password = passwordTextBox.get()
 
-            print(username)
-            print(password)
-
             if not username or not password:
                 myLabel.configure(text="Please enter your username and password", fg='red', bg='#84A9C0')
                 myLabel.place(x=110, y=150)
             else:
 
-                print("test")
                 recv = self.serverHandler.login(username, password)
-                print(recv)
+                #print(recv)
 
                 if recv == "failed":
                     print("Failed to log in")
@@ -125,68 +120,39 @@ class GUI():
         idLabel = Label(frameWeatherInfo, font=("Courier", 18), text="")
         idLabel.place(x=0, y=100)
 
-        #try:
+        # try:
         #    idLabel.configure(text=f"sensor ID: {everyID[counter]}")
-        #except:
+        # except:
         #    idLabel.configure(text="No IDs picked")
 
         def goNext():
+            try:
+                if len(everyID) < self.counter + 2:
+                    self.counter = 0
+                else:
+                    self.counter = self.counter + 1
 
-            print(f"GoNext counter: {self.counter}")
-            nextID = everyID[self.counter]
-            idLabel.configure(text=f"sensor ID: {nextID}")
-            print(f"Pressed: {self.counter}, sensor {nextID}")
+                nextID = everyID[self.counter]
+                idLabel.configure(text=f"Sensor ID: {nextID}")
+                print(f"Pressed: {self.counter}, sensor {nextID}")
 
-            if len(everyID) < self.counter + 2:
-                self.counter = 0
-            else:
-                self.counter = self.counter + 1
+                recv = self.serverHandler.getDataDiff(nextID, amount)
+                data = recv[recv.find(":") + 1:]
 
-                #if len(everyID) - 1 == counter:
-                #    counter = len(everyID) - 2 - counter
+                disallowed_charachters = "{}"
+                for charachters in disallowed_charachters:
+                    data = data.replace(charachters, "")
 
-            recv = self.serverHandler.getDataDiff(nextID, amount)
-            data = recv[recv.find(":") + 1:]
+                cleanData = data.strip()
+                sensorLabel.configure(text=cleanData)
 
-            disallowed_charachters = "{}"
-            for charachters in disallowed_charachters:
-                data = data.replace(charachters, "")
-
-            cleanData = data.strip()
-            sensorLabel.configure(text=cleanData)
-
-            return nextID
-
-            #try:
-            #    global counter
-            #    counter = counter + 1
-            #    idLabel.configure(text=f"sensor ID: {everyID[counter]}")
-            #    print(f"Pressed: {counter}, sensor {everyID[counter]}")
-
-            #    if len(everyID) - 1 == ++counter:
-            #        counter = len(everyID) - 2 - counter
-
-            #except:
-            #    print("Only one or no sensors are left")
-            #    counter = 0
-
-            #print(f"Counter: {counter}")
-
-            #recv = self.serverHandler.getData(everyID, counter, amount)
-            #data = recv[recv.find(":") + 1:]
-
-            #disallowed_charachters = "{}"
-            #for charachters in disallowed_charachters:
-            #    data = data.replace(charachters, "")
-
-            #cleanData = data.strip()
-            #sensorLabel.configure(text=cleanData)
-            #frameWeatherInfo.after(5000, getData)
+            except:
+                idLabel.configure(text=f"No sensor picked")
 
         # won't work
         def getData():
-
-            recv = self.serverHandler.getData(goNext(), amount)
+            #print(f"ID: {everyID[self.counter]}, counter: {self.counter}")
+            recv = self.serverHandler.getData(everyID, counter, amount)
             data = recv[recv.find(":") + 1:]
 
             disallowed_charachters = "{}"
@@ -195,25 +161,14 @@ class GUI():
             cleanData = data.strip()
 
             sensorLabel.configure(text=cleanData)
-            idLabel.configure(text=f"Sensor ID: {everyID[counter]}")
+            idLabel.configure(text=f"Sensor ID: {everyID[self.counter]}")
             frameWeatherInfo.after(5000, getData)
-
-            #recv = self.serverHandler.getData(everyID, counter, amount)
-            #data = recv[recv.find(":") + 1:]
-
-            #disallowed_charachters = "{}"
-            #for charachters in disallowed_charachters:
-            #    data = data.replace(charachters, "")
-
-            #cleanData = data.strip()
-
-            #sensorLabel.configure(text=cleanData)
-            #frameWeatherInfo.after(5000, getData)
 
         try:
             getData()
         except:
             print("error because no ID was picked")
+            idLabel.configure(text=f"No sensor picked")
 
         nextButton = Button(frameMenu, text="Next", bg='#84A9C0', command=goNext)
         nextButton.place(x=270, y=100)
@@ -239,6 +194,11 @@ class GUI():
         # ------------------------------------------------------------------------------
 
         def plotClick():
+            recv = self.serverHandler.getRange(1)
+            rangeAmount = recv[recv.find(":") + 1:]
+            print(rangeAmount)
+
+        def plotClick2():
             plotData = {}
             plotTime = {}
 
@@ -286,20 +246,19 @@ class GUI():
 
                     veryCleanData = ""
                     if len(cleanData) == 30:
-                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[29] - cleanData[28] - cleanData[27] - cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
+                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[29] - cleanData[28] - \
+                                        cleanData[27] - cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
                     elif len(cleanData) == 29:
-                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[28] - cleanData[27] - cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
+                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[28] - cleanData[27] - \
+                                        cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
                     elif len(cleanData) == 28:
-                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[27] - cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
+                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[27] - cleanData[26] - \
+                                        cleanData[25] - cleanData[24] - cleanData[23]
 
                     cleanRangeTime.append(veryCleanData)
 
                 plotTime[item] = cleanRangeTime
                 print(f"plot time for {item}: {plotTime[item]}")
-
-
-
-
 
         plotButton = Button(frameMenu, text="Plot", bg='#84A9C0', command=plotClick)
         plotButton.place(x=450, y=100)
@@ -318,10 +277,10 @@ class GUI():
         serverListLabel = Label(frameShow, text="Select the sensor you want to:", bg='#84A9C0')
         serverListLabel.place(x=50, y=50)
 
-        showLabel = Label(frameShow, text="Show", bg='#84A9C0')
+        showLabel = Label(frameShow, text="Showing", bg='#84A9C0')
         showLabel.place(x=50, y=125)
 
-        hideLabel = Label(frameShow, text="Hide", bg='#84A9C0')
+        hideLabel = Label(frameShow, text="Hiding", bg='#84A9C0')
         hideLabel.place(x=300, y=125)
 
         def exitShow():
