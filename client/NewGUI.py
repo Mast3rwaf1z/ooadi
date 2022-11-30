@@ -194,17 +194,19 @@ class GUI():
         # ------------------------------------------------------------------------------
 
         def plotClick():
-            recv = self.serverHandler.getRange(1)
-            rangeAmount = recv[recv.find(":") + 1:]
-            print(rangeAmount)
+            print("test")
+            #recv = self.serverHandler.getRange(everyID[self.counter])
+            #rangeAmount = recv[recv.find(":") + 1:]
+            #print(rangeAmount)
 
-        def plotClick2():
+        def plotClick():
             plotData = {}
             plotTime = {}
 
             for item in everyID:
                 recv = self.serverHandler.getRange(item)
                 rangeAmount = recv[recv.find(":") + 1:]
+                print(f"ID: {item}")
                 print(f"range amount: {rangeAmount}")
                 recv2 = self.serverHandler.getDataDiff(item, rangeAmount)
                 rangeStuff = recv2[recv2.find(":") + 1:]
@@ -212,12 +214,15 @@ class GUI():
                 cleanRangeData = []
                 cleanRangeTime = []
 
+                #wrong here
                 for j in rangeStuff:
                     disallowed_charachters = "{}"
                     for charachters in disallowed_charachters:
                         j = j.replace(charachters, "")
 
                     cleanData = j.strip()
+
+                    print(f"does this work? {j}")
 
                     cleanCleanData = ""
                     veryCleanData = ""
