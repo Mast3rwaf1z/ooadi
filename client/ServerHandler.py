@@ -24,6 +24,14 @@ class ServerHandler:
         self.s.send(f'getdata {everyID[counter]} {amount}\n'.encode('utf-8'))
         return self.s.recv(1024).decode("utf-8")
 
+    def getDataDiff(self, ID , amount):
+        self.s.send(f'getdata {ID} {amount}\n'.encode('utf-8'))
+        return self.s.recv(1024).decode("utf-8")
+
+    def getRange(self, ids):
+        self.s.send(f'getrange {ids}\n'.encode('utf-8'))
+        return self.s.recv(1024).decode("utf-8")
+
     def closeSocket(self):
         self.s.close()
 

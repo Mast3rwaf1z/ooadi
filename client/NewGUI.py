@@ -1,24 +1,21 @@
-import Plot
 from ServerHandler import ServerHandler
-
-import pickle
+import Plot
 from tkinter import *
-import socket
+import pickle
 
 
 class GUI():
-    def __init__(self, requestHandler):
-        self.requestHandler = requestHandler
+    def __init__(self):
         self.serverHandler = ServerHandler('localhost')
-        #self.serverHandler.connect()
+        self.counter = 0
+        # self.serverHandler.connect()
 
     def main(self):
-        GUI("test").window()
+        GUI().window()
 
     def plot(self):
         print("what")
 
-    counter = 0
 
     def window(self):
         # This has to be between here and the first call to ServerHandler.login
@@ -93,6 +90,7 @@ class GUI():
     # Main menu
     def MainMenu(self, window):
         print("refreshed Main menu")
+        counter = 0
 
         recv = self.serverHandler.getIDS()
         dataRec = recv[recv.find(":") + 1:]
@@ -103,7 +101,6 @@ class GUI():
                 pickedID = pickle.load(file)
         except:
             with open('hide.pkl', 'w'):
-                pass
                 pickedID = []
 
         for i in pickedID:
@@ -112,11 +109,7 @@ class GUI():
                     everyID.remove(i)
 
         print(f"shown ids amount: {len(everyID)}, ids = {everyID}")
-
-        # id 1 2 3 4
-        id = 1
         amount = 1
-        global counter
 
         # new canvas
         frameMenu = Frame(window, width=600, height=600)
@@ -132,27 +125,27 @@ class GUI():
         idLabel = Label(frameWeatherInfo, font=("Courier", 18), text="")
         idLabel.place(x=0, y=100)
 
-        try:
-            idLabel.configure(text=f"sensor ID: {everyID[counter]}")
-        except:
-            idLabel.configure(text="No IDs picked")
+        #try:
+        #    idLabel.configure(text=f"sensor ID: {everyID[counter]}")
+        #except:
+        #    idLabel.configure(text="No IDs picked")
 
         def goNext():
-            try:
-                global counter
-                counter = counter + 1
-                print(f"Pressed: {counter}, sensor {everyID[counter]}")
 
-                idLabel.configure(text=f"sensor ID: {everyID[counter]}")
+            print(f"GoNext counter: {self.counter}")
+            nextID = everyID[self.counter]
+            idLabel.configure(text=f"sensor ID: {nextID}")
+            print(f"Pressed: {self.counter}, sensor {nextID}")
 
-                if len(everyID) - 1 == ++counter:
-                    counter = len(everyID) - 2 - counter
+            if len(everyID) < self.counter + 2:
+                self.counter = 0
+            else:
+                self.counter = self.counter + 1
 
-            except:
-                print("Only one or no sensors are left")
-                counter = 0
+                #if len(everyID) - 1 == counter:
+                #    counter = len(everyID) - 2 - counter
 
-            recv = self.serverHandler.getData(everyID, counter, amount)
+            recv = self.serverHandler.getDataDiff(nextID, amount)
             data = recv[recv.find(":") + 1:]
 
             disallowed_charachters = "{}"
@@ -161,21 +154,61 @@ class GUI():
 
             cleanData = data.strip()
             sensorLabel.configure(text=cleanData)
-            frameWeatherInfo.after(5000, getData)
+
+            return nextID
+
+            #try:
+            #    global counter
+            #    counter = counter + 1
+            #    idLabel.configure(text=f"sensor ID: {everyID[counter]}")
+            #    print(f"Pressed: {counter}, sensor {everyID[counter]}")
+
+            #    if len(everyID) - 1 == ++counter:
+            #        counter = len(everyID) - 2 - counter
+
+            #except:
+            #    print("Only one or no sensors are left")
+            #    counter = 0
+
+            #print(f"Counter: {counter}")
+
+            #recv = self.serverHandler.getData(everyID, counter, amount)
+            #data = recv[recv.find(":") + 1:]
+
+            #disallowed_charachters = "{}"
+            #for charachters in disallowed_charachters:
+            #    data = data.replace(charachters, "")
+
+            #cleanData = data.strip()
+            #sensorLabel.configure(text=cleanData)
+            #frameWeatherInfo.after(5000, getData)
 
         # won't work
         def getData():
 
-            recv = self.serverHandler.getData(everyID, counter, amount)
+            recv = self.serverHandler.getData(goNext(), amount)
             data = recv[recv.find(":") + 1:]
 
             disallowed_charachters = "{}"
             for charachters in disallowed_charachters:
                 data = data.replace(charachters, "")
-
             cleanData = data.strip()
+
             sensorLabel.configure(text=cleanData)
+            idLabel.configure(text=f"Sensor ID: {everyID[counter]}")
             frameWeatherInfo.after(5000, getData)
+
+            #recv = self.serverHandler.getData(everyID, counter, amount)
+            #data = recv[recv.find(":") + 1:]
+
+            #disallowed_charachters = "{}"
+            #for charachters in disallowed_charachters:
+            #    data = data.replace(charachters, "")
+
+            #cleanData = data.strip()
+
+            #sensorLabel.configure(text=cleanData)
+            #frameWeatherInfo.after(5000, getData)
 
         try:
             getData()
@@ -204,6 +237,72 @@ class GUI():
         exitMainButton.place(x=25, y=25)
 
         # ------------------------------------------------------------------------------
+
+        def plotClick():
+            plotData = {}
+            plotTime = {}
+
+            for item in everyID:
+                recv = self.serverHandler.getRange(item)
+                rangeAmount = recv[recv.find(":") + 1:]
+                print(f"range amount: {rangeAmount}")
+                recv2 = self.serverHandler.getDataDiff(item, rangeAmount)
+                rangeStuff = recv2[recv2.find(":") + 1:]
+                print(f"range stuff: {rangeStuff}")
+                cleanRangeData = []
+                cleanRangeTime = []
+
+                for j in rangeStuff:
+                    disallowed_charachters = "{}"
+                    for charachters in disallowed_charachters:
+                        j = j.replace(charachters, "")
+
+                    cleanData = j.strip()
+
+                    cleanCleanData = ""
+                    veryCleanData = ""
+                    for i in range(0, len(cleanData)):
+                        if i > 24:
+                            cleanCleanData = cleanCleanData + cleanData[i]
+
+                    if len(cleanCleanData) == 4:
+                        veryCleanData = veryCleanData + cleanCleanData[0] + cleanCleanData[1] + cleanCleanData[2]
+                    elif len(cleanCleanData) == 3:
+                        veryCleanData = veryCleanData + cleanCleanData[0] + cleanCleanData[1]
+                    elif len(cleanCleanData) == 2:
+                        veryCleanData = veryCleanData + cleanCleanData[0]
+
+                    cleanRangeData.append(veryCleanData)
+
+                plotData[item] = cleanRangeData
+                print(f"plot time for {item}: {plotData[item]}")
+
+                for v in rangeStuff:
+                    disallowed_charachters = "{}"
+                    for charachters in disallowed_charachters:
+                        v = v.replace(charachters, "")
+
+                    cleanData = v.strip()
+
+                    veryCleanData = ""
+                    if len(cleanData) == 30:
+                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[29] - cleanData[28] - cleanData[27] - cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
+                    elif len(cleanData) == 29:
+                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[28] - cleanData[27] - cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
+                    elif len(cleanData) == 28:
+                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[27] - cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
+
+                    cleanRangeTime.append(veryCleanData)
+
+                plotTime[item] = cleanRangeTime
+                print(f"plot time for {item}: {plotTime[item]}")
+
+
+
+
+
+        plotButton = Button(frameMenu, text="Plot", bg='#84A9C0', command=plotClick)
+        plotButton.place(x=450, y=100)
 
         # Opens the sensor list frame
 
@@ -327,4 +426,4 @@ class GUI():
 
 
 if __name__ == "__main__":
-    GUI("test").main()
+    GUI().main()
