@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -53,7 +54,9 @@ public class SensorManager implements Runnable {
                 Server.getCli().acceptPrint("Accepted sensor with id: "+loginRequest[1]);
                 Server.getLog().add(new SensorConnectEvent(loginRequest[1], sensorSocket.getInetAddress().getHostAddress()));
                 Server.getDatabase().addEntry(loginRequest[1]);
+                collectLock.lock();
                 sensors.put(loginRequest[1], new Sensor(sensorSocket));
+                collectLock.unlock();
             } catch (IOException e) {
                 Server.getCli().printException(e);
             }
@@ -63,22 +66,26 @@ public class SensorManager implements Runnable {
     
     public Map<String, String> collect() throws IOException{
         collectLock.lock();
-        Server.getCli().debugPrint("Requesting data...");
+        Server.getCli().debugPrint("Requesting data... " + "Sensors available: "+getSensorCount());
         
-        for(String key : sensors.keySet()){
+        Iterator<String> iterator = sensors.keySet().iterator();
+        while(iterator.hasNext()){
+            String key = iterator.next();
             Sensor sensor = sensors.get(key);
             try{
                 sensor.transmit("request");
             }
             catch(SocketException e){
                 Server.getCli().errorPrint("Sensor identified by id: "+key+" has disconnected.");
-                sensors.remove(key);
+                iterator.remove();
                 Server.getLog().add(new SensorDisconnectEvent(key, sensor.getAddress()));
             }
         }
         Map<String, String> result = new HashMap<>();
         Server.getCli().debugPrint("Collecting data");
-        for(String key : sensors.keySet()){
+        iterator = sensors.keySet().iterator();
+        while(iterator.hasNext()){
+            String key = iterator.next();
             Sensor sensor = sensors.get(key);
             String data = "";
             try{
@@ -86,7 +93,7 @@ public class SensorManager implements Runnable {
             }
             catch(SocketException e){
                 Server.getCli().errorPrint("Sensor identified by id: "+key+" has disconnected.");
-                sensors.remove(key);
+                iterator.remove();
                 Server.getLog().add(new SensorDisconnectEvent(key, sensor.getAddress()));
             }
             result.put(key, data);
@@ -113,10 +120,12 @@ public class SensorManager implements Runnable {
     }
      
     public void clear(){
+        collectLock.lock();
         for(Sensor sensor : sensors.values()){
             sensor.close();
         }
         sensors = new HashMap<>();
+        collectLock.unlock();
     }
 
     private boolean login(String password){
