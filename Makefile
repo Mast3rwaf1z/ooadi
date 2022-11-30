@@ -15,8 +15,8 @@ arg2=
 
 compile:
 	@echo "compiling..."
-	@rm server/bin/server/*.class
-	@rm server/bin/server/events/*.class
+	@rm -rf server/bin/server/*.class
+	@rm -rf server/bin/server/events/*.class
 	@$(jc) -cp $(classpath) server/src/server/Server.java -d server/bin
 
 server: compile
