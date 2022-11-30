@@ -34,8 +34,13 @@ public class RequestHandler implements Runnable{
             for(Socket client = socket.accept();; client = socket.accept()){
                 id++;
                 Server.getLog().add(new ClientConnectEvent(client.getInetAddress().getHostAddress(), id));
-
-                String[] request = new BufferedReader(new InputStreamReader(client.getInputStream())).readLine().split(" ");
+                String line = new BufferedReader(new InputStreamReader(client.getInputStream())).readLine();
+                if(line == null){
+                    Server.getCli().errorPrint("Client disconnected before sending a login request");
+                    continue;
+                }
+                String[] request = line.split(" ");
+                
                 if(!request[0].equals("login") && request.length != 3){
                     Server.getCli().errorPrint("Client sent an invalid login request");
                     Server.getLog().add(new ClientLoginFailedEvent(client.getInetAddress().getHostAddress(), id));
