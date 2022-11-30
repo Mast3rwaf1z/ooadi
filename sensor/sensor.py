@@ -15,7 +15,7 @@ s.connect((address, 8888))
 print("connected! validating id and password...")
 s.send(bytes(password+" "+id+"\n", encoding="utf-8"))
 
-if s.recv(1024).decode("utf-8") == "": 
+if s.recv(1024).decode("utf-8") == "invalid": 
     print("invalid id")
     exit(0)
 print("Successfully connected to server")

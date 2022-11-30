@@ -119,7 +119,7 @@ public class Client implements Runnable{
 
     }
     private String getRange(String id){
-        int amount = Server.getDatabase().getSensorData(Server.getDatabase().getIds().get(Integer.parseInt(id))).size();
+        int amount = Server.getDatabase().getSensorData(id).size();
         return "getrangereply:"+amount;
 
     }
