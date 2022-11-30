@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -31,26 +30,34 @@ public class SensorManager implements Runnable {
         Server.getCli().debugPrint("accepting sensors");
         while(true){
             try {
-                Socket sensor = socket.accept();
-                Server.getCli().debugPrint("accepted sensor, validating id...");
-                List<String> registeredSensors = Server.getDatabase().getIds();
-                String id = new BufferedReader(new InputStreamReader(sensor.getInputStream())).readLine();
-                Server.getCli().debugPrint("The received id is: " + id);
-
-                if(registeredSensors.contains(id)){
-                    Server.getCli().acceptPrint("The id is valid, adding sensor to map of sensors...");
-                    sensors.put(id, new Sensor(sensor));
-                    Server.getLog().add(new SensorConnectEvent(id, sensor.getInetAddress().getHostAddress()));
+                Socket sensorSocket = socket.accept();
+                String[] loginRequest = new BufferedReader(new InputStreamReader(sensorSocket.getInputStream())).readLine().split(" ");
+                if(loginRequest.length != 2){
+                    Server.getCli().errorPrint("Error, not enough arguments!");
+                    Server.getLog().add(new SensorConnectionRefusedEvent(null, sensorSocket.getInetAddress().getHostAddress()));
+                    sensorSocket.close();
+                    continue;
                 }
-                else{
-                    Server.getCli().errorPrint("The id is invalid, cutting off the connection!");
-                    Server.getLog().add(new SensorConnectionRefusedEvent(id, socket.getInetAddress().getHostAddress()));
-                    sensor.close();
+                if(!login(loginRequest[0])){
+                    Server.getCli().errorPrint("Error, sensor #"+loginRequest[1]+" wrong master password!");
+                    Server.getLog().add(new SensorConnectionRefusedEvent(loginRequest[1], sensorSocket.getInetAddress().getHostAddress()));
+                    sensorSocket.close();
+                    continue;
                 }
+                if(sensors.containsKey(loginRequest[1])){
+                    Server.getCli().errorPrint("Error, sensor #"+loginRequest[1]+" id already exists");
+                    Server.getLog().add(new SensorConnectionRefusedEvent(loginRequest[1], sensorSocket.getInetAddress().getHostAddress()));
+                    sensorSocket.close();
+                    continue;
+                }
+                Server.getCli().acceptPrint("Accepted sensor with id: "+loginRequest[1]);
+                Server.getLog().add(new SensorConnectEvent(loginRequest[1], sensorSocket.getInetAddress().getHostAddress()));
+                Server.getDatabase().addEntry(loginRequest[1]);
+                sensors.put(loginRequest[1], new Sensor(sensorSocket));
             } catch (IOException e) {
                 Server.getCli().printException(e);
-                
             }
+            
         }
     }
     
@@ -110,6 +117,10 @@ public class SensorManager implements Runnable {
             sensor.close();
         }
         sensors = new HashMap<>();
+    }
+
+    private boolean login(String password){
+        return Server.getDatabase().getMasterPassword().equals(password);
     }
     
 }
