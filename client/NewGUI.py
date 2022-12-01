@@ -62,7 +62,7 @@ class GUI():
             else:
 
                 recv = self.serverHandler.login(username, password)
-                #print(recv)
+                # print(recv)
 
                 if recv == "failed":
                     print("Failed to log in")
@@ -151,7 +151,7 @@ class GUI():
 
         # won't work
         def getData():
-            #print(f"ID: {everyID[self.counter]}, counter: {self.counter}")
+            # print(f"ID: {everyID[self.counter]}, counter: {self.counter}")
             recv = self.serverHandler.getData(everyID, counter, amount)
             data = recv[recv.find(":") + 1:]
 
@@ -195,75 +195,89 @@ class GUI():
 
         def plotClick():
             print("test")
-            #recv = self.serverHandler.getRange(everyID[self.counter])
-            #rangeAmount = recv[recv.find(":") + 1:]
-            #print(rangeAmount)
+            # recv = self.serverHandler.getRange(everyID[self.counter])
+            # rangeAmount = recv[recv.find(":") + 1:]
+            # print(rangeAmount)
 
         def plotClick():
-            plotData = {}
-            plotTime = {}
+            plotData = []
+            plotTime = []
 
             for item in everyID:
                 recv = self.serverHandler.getRange(item)
                 rangeAmount = recv[recv.find(":") + 1:]
-                print(f"ID: {item}")
-                print(f"range amount: {rangeAmount}")
+
                 recv2 = self.serverHandler.getDataDiff(item, rangeAmount)
                 rangeStuff = recv2[recv2.find(":") + 1:]
-                print(f"range stuff: {rangeStuff}")
-                cleanRangeData = []
-                cleanRangeTime = []
+                print(f"ID: {item}, range amount {rangeAmount}, Data: {rangeStuff}")
 
-                #wrong here
-                for j in rangeStuff:
-                    disallowed_charachters = "{}"
+                cleanRangeData = []
+
+                rangeStuffSplit = rangeStuff.splitlines()
+                for j in rangeStuffSplit:
+
+                    disallowed_charachters = "{},"
                     for charachters in disallowed_charachters:
                         j = j.replace(charachters, "")
+                    individualCleanRangeData = j.strip()
 
-                    cleanData = j.strip()
+                    cleanRangeData.append(individualCleanRangeData)
 
-                    print(f"does this work? {j}")
+                try:
+                    cleanRangeData.pop(int(rangeAmount) + 1)
+                except:
+                    print("Last one has no empty element in array")
+                cleanRangeData.pop(0)
 
-                    cleanCleanData = ""
-                    veryCleanData = ""
-                    for i in range(0, len(cleanData)):
+                #print(f"individual? {cleanRangeData}")
+                veryCleanRangeData = []
+                veryCleanRangeTime = []
+
+                for v in cleanRangeData:
+                    individualVeryCleanData = ""
+                    individualVeryVeryCleanData = ""
+                    for i in range(0, len(v)):
                         if i > 24:
-                            cleanCleanData = cleanCleanData + cleanData[i]
+                            individualVeryCleanData = individualVeryCleanData + v[i]
 
-                    if len(cleanCleanData) == 4:
-                        veryCleanData = veryCleanData + cleanCleanData[0] + cleanCleanData[1] + cleanCleanData[2]
-                    elif len(cleanCleanData) == 3:
-                        veryCleanData = veryCleanData + cleanCleanData[0] + cleanCleanData[1]
-                    elif len(cleanCleanData) == 2:
-                        veryCleanData = veryCleanData + cleanCleanData[0]
+                    #individualVeryCleanData.replace('"', '')
 
-                    cleanRangeData.append(veryCleanData)
+                    if len(individualVeryCleanData) == 4:
+                        individualVeryVeryCleanData = individualVeryVeryCleanData + individualVeryCleanData[0] + individualVeryCleanData[1] + individualVeryCleanData[2]
+                    elif len(individualVeryCleanData) == 3:
+                        individualVeryVeryCleanData = individualVeryVeryCleanData + individualVeryCleanData[0] + individualVeryCleanData[1]
+                    elif len(individualVeryCleanData) == 2:
+                        individualVeryVeryCleanData = individualVeryVeryCleanData + individualVeryCleanData[0]
 
-                plotData[item] = cleanRangeData
-                print(f"plot time for {item}: {plotData[item]}")
+                    veryCleanRangeData.append(int(individualVeryVeryCleanData))
 
-                for v in rangeStuff:
-                    disallowed_charachters = "{}"
-                    for charachters in disallowed_charachters:
-                        v = v.replace(charachters, "")
+                print(f"Clea data: {veryCleanRangeData}")
 
-                    cleanData = v.strip()
+                for b in cleanRangeData:
+                    individualVeryCleanTime = ""
+                    individualVeryVeryCleanTime = ""
 
-                    veryCleanData = ""
-                    if len(cleanData) == 30:
-                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[29] - cleanData[28] - \
-                                        cleanData[27] - cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
-                    elif len(cleanData) == 29:
-                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[28] - cleanData[27] - \
-                                        cleanData[26] - cleanData[25] - cleanData[24] - cleanData[23]
-                    elif len(cleanData) == 28:
-                        veryCleanData = veryCleanData + cleanData - cleanData[0] - cleanData[27] - cleanData[26] - \
-                                        cleanData[25] - cleanData[24] - cleanData[23]
+                    for i in range(0, len(b)):
+                        if i > 0:
+                            if i < 22:
+                                individualVeryCleanTime = individualVeryCleanTime + b[i]
 
-                    cleanRangeTime.append(veryCleanData)
+                    veryCleanRangeTime.append(individualVeryCleanTime)
 
-                plotTime[item] = cleanRangeTime
-                print(f"plot time for {item}: {plotTime[item]}")
+                print(f"Clea time: {veryCleanRangeTime}")
+
+                #How to save data to dictionary. Ask a question?
+
+                #n = 0
+                #for i in veryCleanRangeTime:
+                #    plotData[i] = veryCleanRangeData[n]
+                #    n = n + 1
+
+                #plotData.append(graphData)
+                #plotTime.append(graphTime)
+
+            print(plotData)
+            #plot = Plot.Plot(plotData, plotTime)
 
         plotButton = Button(frameMenu, text="Plot", bg='#84A9C0', command=plotClick)
         plotButton.place(x=450, y=100)
