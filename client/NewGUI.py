@@ -203,6 +203,11 @@ class GUI():
             plotData = []
             plotTime = []
 
+            exitMainButton['state'] = DISABLED
+            showButton['state'] = DISABLED
+            nextButton['state'] = DISABLED
+            plotButton['state'] = DISABLED
+
             for item in everyID:
                 recv = self.serverHandler.getRange(item)
                 rangeAmount = recv[recv.find(":") + 1:]
@@ -229,7 +234,7 @@ class GUI():
                     print("Last one has no empty element in array")
                 cleanRangeData.pop(0)
 
-                #print(f"individual? {cleanRangeData}")
+                # print(f"individual? {cleanRangeData}")
                 veryCleanRangeData = []
                 veryCleanRangeTime = []
 
@@ -240,18 +245,23 @@ class GUI():
                         if i > 24:
                             individualVeryCleanData = individualVeryCleanData + v[i]
 
-                    #individualVeryCleanData.replace('"', '')
+                    # individualVeryCleanData.replace('"', '')
 
                     if len(individualVeryCleanData) == 4:
-                        individualVeryVeryCleanData = individualVeryVeryCleanData + individualVeryCleanData[0] + individualVeryCleanData[1] + individualVeryCleanData[2]
+                        individualVeryVeryCleanData = individualVeryVeryCleanData + individualVeryCleanData[0] + \
+                                                      individualVeryCleanData[1] + individualVeryCleanData[2]
                     elif len(individualVeryCleanData) == 3:
-                        individualVeryVeryCleanData = individualVeryVeryCleanData + individualVeryCleanData[0] + individualVeryCleanData[1]
+                        individualVeryVeryCleanData = individualVeryVeryCleanData + individualVeryCleanData[0] + \
+                                                      individualVeryCleanData[1]
                     elif len(individualVeryCleanData) == 2:
                         individualVeryVeryCleanData = individualVeryVeryCleanData + individualVeryCleanData[0]
+                    else:
+                        individualVeryVeryCleanData = "0"
 
+                    #print(f"individual fdata: {individualVeryVeryCleanData}")
                     veryCleanRangeData.append(int(individualVeryVeryCleanData))
 
-                print(f"Clea data: {veryCleanRangeData}")
+                print(f"Clean data: {veryCleanRangeData}")
 
                 for b in cleanRangeData:
                     individualVeryCleanTime = ""
@@ -264,20 +274,25 @@ class GUI():
 
                     veryCleanRangeTime.append(individualVeryCleanTime)
 
-                print(f"Clea time: {veryCleanRangeTime}")
+                print(f"Clean time: {veryCleanRangeTime}")
 
-                #How to save data to dictionary. Ask a question?
+                plot = Plot.Plot(veryCleanRangeData, veryCleanRangeTime, item)
 
-                #n = 0
-                #for i in veryCleanRangeTime:
-                #    plotData[i] = veryCleanRangeData[n]
-                #    n = n + 1
+            self.serverHandler.closeSocket()
+            window.quit()
 
-                #plotData.append(graphData)
-                #plotTime.append(graphTime)
+            # How to save data to dictionary. Ask a question?
 
-            print(plotData)
-            #plot = Plot.Plot(plotData, plotTime)
+            # n = 0
+            # for i in veryCleanRangeTime:
+            #    plotData[i] = veryCleanRangeData[n]
+            #    n = n + 1
+
+            # plotData.append(graphData)
+            # plotTime.append(graphTime)
+
+            # print(plotData)
+            # plot = Plot.Plot(plotData, plotTime)
 
         plotButton = Button(frameMenu, text="Plot", bg='#84A9C0', command=plotClick)
         plotButton.place(x=450, y=100)
