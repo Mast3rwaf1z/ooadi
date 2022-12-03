@@ -13,9 +13,6 @@ class GUI():
     def main(self):
         GUI().window()
 
-    def plot(self):
-        print("what")
-
     def window(self):
         # This has to be between here and the first call to ServerHandler.login
         # Otherwise the socket will just not send anything
@@ -74,7 +71,7 @@ class GUI():
                     window.after(2000, frame1.destroy)
                     log_in['state'] = DISABLED
                     exit_button['state'] = DISABLED
-                    window.after(2000, lambda: self.MainMenu(window))
+                    window.after(2000, lambda: self.mainMenu(window))
 
         log_in = Button(frame1, text="Log in", command=myClick, bg='#84A9C0')
         log_in.place(x=380, y=150)
@@ -83,7 +80,7 @@ class GUI():
         exit_button.place(x=50, y=150)
 
     # Main menu
-    def MainMenu(self, window):
+    def mainMenu(self, window):
         print("refreshed Main menu")
         counter = 0
 
@@ -136,7 +133,7 @@ class GUI():
                 idLabel.configure(text=f"Sensor ID: {nextID}")
                 print(f"Pressed: {self.counter}, sensor {nextID}")
 
-                recv = self.serverHandler.getDataDiff(nextID, amount)
+                recv = self.serverHandler.getData(nextID, amount)
                 data = recv[recv.find(":") + 1:]
 
                 disallowed_charachters = "{}"
@@ -152,7 +149,7 @@ class GUI():
         # won't work
         def getData():
             # print(f"ID: {everyID[self.counter]}, counter: {self.counter}")
-            recv = self.serverHandler.getData(everyID, counter, amount)
+            recv = self.serverHandler.getData(everyID[counter], amount)
             data = recv[recv.find(":") + 1:]
 
             disallowed_charachters = "{}"
@@ -212,7 +209,7 @@ class GUI():
                 recv = self.serverHandler.getRange(item)
                 rangeAmount = recv[recv.find(":") + 1:]
 
-                recv2 = self.serverHandler.getDataDiff(item, rangeAmount)
+                recv2 = self.serverHandler.getData(item, rangeAmount)
                 rangeStuff = recv2[recv2.find(":") + 1:]
                 print(f"ID: {item}, range amount {rangeAmount}, Data: {rangeStuff}")
 
@@ -258,7 +255,7 @@ class GUI():
                     else:
                         individualVeryVeryCleanData = "0"
 
-                    #print(f"individual fdata: {individualVeryVeryCleanData}")
+                    # print(f"individual fdata: {individualVeryVeryCleanData}")
                     veryCleanRangeData.append(int(individualVeryVeryCleanData))
 
                 print(f"Clean data: {veryCleanRangeData}")
@@ -320,7 +317,7 @@ class GUI():
         def exitShow():
             frameShow.destroy()
             frameMenu.destroy()
-            self.MainMenu(window)
+            self.mainMenu(window)
 
         exitButton = Button(frameShow, text="Exit", bg='#84A9C0', command=exitShow)
         exitButton.place(x=50, y=550)
@@ -412,7 +409,7 @@ class GUI():
 
             window.after(2000, frameShow.destroy)
             window.after(2000, frameMenu.destroy)
-            window.after(2000, self.MainMenu(window))
+            window.after(2000, self.mainMenu(window))
 
         saveButton = Button(frameShow, text="Save", command=saveIt, bg='#84A9C0')
         saveButton.place(x=500, y=550)

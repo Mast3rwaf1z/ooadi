@@ -20,11 +20,11 @@ class ServerHandler:
         self.s.send('getids\n'.encode('utf-8'))
         return self.s.recv(1024).decode("utf-8")
 
-    def getData(self, everyID, counter, amount):
-        self.s.send(f'getdata {everyID[counter]} {amount}\n'.encode('utf-8'))
-        return self.s.recv(1024).decode("utf-8")
+    #def getData(self, everyID, counter, amount):
+    #    self.s.send(f'getdata {everyID[counter]} {amount}\n'.encode('utf-8'))
+    #    return self.s.recv(1024).decode("utf-8")
 
-    def getDataDiff(self, ID, amount):
+    def getData(self, ID, amount):
         self.s.send(f'getdata {ID} {amount}\n'.encode('utf-8'))
         return self.s.recv(1024).decode("utf-8")
 
