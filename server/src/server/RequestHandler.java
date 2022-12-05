@@ -14,10 +14,18 @@ import server.events.ClientConnectEvent;
 import server.events.ClientLoginEvent;
 import server.events.ClientLoginFailedEvent;
 
+/**
+ * This is the RequestHandler, it handles clients connecting and verifies them
+ * @param run This is the supertype run method of the Runnable class. This is run when passed to a threading object
+ * @param login verifies the credentials received from a client, returns a boolean based on the validity of these credentials
+ */
 public class RequestHandler implements Runnable{
     private Map<Integer, Client> clients = new HashMap<>();
     private ServerSocket socket;
 
+    /**
+     * This is the constructor, it starts a server socket on port 8000
+     */
     public RequestHandler(){
         try {
             socket = new ServerSocket(8000);
@@ -27,6 +35,9 @@ public class RequestHandler implements Runnable{
         }
     }
 
+    /**
+     * This is the supertype run method of the Runnable class, it listens for new clients and verifies their login credentials, it handles early disconnects, invalid login requests and invalid credentials
+     */
     @Override
     public void run() {
         int id = 0;
@@ -74,6 +85,12 @@ public class RequestHandler implements Runnable{
         
     }
 
+    /**
+     * This is the login method, it verifies the login credentials of a client logging in
+     * @param username The username received
+     * @param password The password received
+     * @return A boolean symbolizing whether the login was correct or not
+     */
     public boolean login(String username, String password){
         if(Server.getDatabase().getLogin(username) == null){
             return false;
