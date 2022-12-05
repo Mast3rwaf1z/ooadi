@@ -5,14 +5,18 @@ import pickle
 
 
 class GUI():
+
+    # GUI constructor
     def __init__(self):
         self.serverHandler = ServerHandler('localhost')
         self.counter = 0
         # self.serverHandler.connect()
 
+    # main method
     def main(self):
         GUI().window()
 
+    # Creates a window
     def window(self):
         # This has to be between here and the first call to ServerHandler.login
         # Otherwise the socket will just not send anything
@@ -26,7 +30,7 @@ class GUI():
 
         window.mainloop()
 
-    # Log in menu
+    # Log in screen
     def log_in_frame(self, window):
 
         frame1 = Frame(window, width=500, height=200, bg='#84A9C0')
@@ -49,6 +53,7 @@ class GUI():
 
         myLabel = Label(frame1)
 
+        # Log in button action
         def myClick():
             username = usernameTextBox.get()
             password = passwordTextBox.get()
@@ -58,9 +63,10 @@ class GUI():
                 myLabel.place(x=110, y=150)
             else:
 
-                recv = self.serverHandler.login(username, password)
+                recv = self.serverHandler.login(username, password)  # Sends username and password to server and receives the ack
                 # print(recv)
 
+                # If the username and password is incorrect the server will send 'failed'
                 if recv == "failed":
                     print("Failed to log in")
                     myLabel.configure(text="Log in unsuccessful", fg='red', bg='#84A9C0')
@@ -71,7 +77,7 @@ class GUI():
                     window.after(2000, frame1.destroy)
                     log_in['state'] = DISABLED
                     exit_button['state'] = DISABLED
-                    window.after(2000, lambda: self.mainMenu(window))
+                    window.after(2000, lambda: self.mainMenu(window))  # calls mainMenu methods after 2 seconds
 
         log_in = Button(frame1, text="Log in", command=myClick, bg='#84A9C0')
         log_in.place(x=380, y=150)
@@ -79,15 +85,17 @@ class GUI():
         exit_button = Button(frame1, text="Exit", command=window.quit, bg='#84A9C0')
         exit_button.place(x=50, y=150)
 
-    # Main menu
+    # Creates Main menu
     def mainMenu(self, window):
         print("refreshed Main menu")
         counter = 0
 
-        recv = self.serverHandler.getIDS()
+        recv = self.serverHandler.getIDS()  # Sends a requests to get IDs from server using server handler
         dataRec = recv[recv.find(":") + 1:]
         everyID = dataRec.split(" ")
 
+        # reads the file 'fide.pkl'
+        # If the program is opened first time or there is no file called 'fide.pkl', it creates it
         try:
             with open('hide.pkl', 'rb') as file:
                 pickedID = pickle.load(file)
@@ -95,6 +103,7 @@ class GUI():
             with open('hide.pkl', 'w'):
                 pickedID = []
 
+        # Removes IDs in everyID that are located in the 'hide.pkl'
         for i in pickedID:
             for j in everyID:
                 if i == j:
@@ -117,11 +126,8 @@ class GUI():
         idLabel = Label(frameWeatherInfo, font=("Courier", 18), text="")
         idLabel.place(x=0, y=100)
 
-        # try:
-        #    idLabel.configure(text=f"sensor ID: {everyID[counter]}")
-        # except:
-        #    idLabel.configure(text="No IDs picked")
-
+        # Next button action
+        # Pressing the button will change the sensor that will be displayed in main menu, in grey box
         def goNext():
             try:
                 if len(everyID) < self.counter + 2:
@@ -133,37 +139,41 @@ class GUI():
                 idLabel.configure(text=f"Sensor ID: {nextID}")
                 print(f"Pressed: {self.counter}, sensor {nextID}")
 
-                recv = self.serverHandler.getData(nextID, amount)
+                recv = self.serverHandler.getData(nextID, amount)  # Sends a request to a server for data,for a specific ID
                 data = recv[recv.find(":") + 1:]
 
-                disallowed_charachters = "{}"
-                for charachters in disallowed_charachters:
-                    data = data.replace(charachters, "")
+                # Filters the string so it is cleaner to use
+                disallowed_characters = "{}"
+                for characters in disallowed_characters:
+                    data = data.replace(characters, "")
 
                 cleanData = data.strip()
                 sensorLabel.configure(text=cleanData)
 
+            # If there is no sensor picked to be visible, then this line will be executed
             except:
                 idLabel.configure(text=f"No sensor picked")
 
-        # won't work
+        # Refreshes data every 5 seconds
         def getData():
             # print(f"ID: {everyID[self.counter]}, counter: {self.counter}")
-            recv = self.serverHandler.getData(everyID[counter], amount)
+            recv = self.serverHandler.getData(everyID[counter], amount)  # Sends a request to a server for data,for a specific ID
             data = recv[recv.find(":") + 1:]
 
-            disallowed_charachters = "{}"
-            for charachters in disallowed_charachters:
-                data = data.replace(charachters, "")
+            # Filters the string so it is cleaner to use
+            disallowed_characters = "{}"
+            for characters in disallowed_characters:
+                data = data.replace(characters, "")
             cleanData = data.strip()
 
             sensorLabel.configure(text=cleanData)
             idLabel.configure(text=f"Sensor ID: {everyID[self.counter]}")
-            frameWeatherInfo.after(5000, getData)
+            frameWeatherInfo.after(5000, getData)  # refreshes every 5 seconds
 
         try:
             getData()
         except:
+            # If there is no sensor picked to be visible, then this line will be executed
             print("error because no ID was picked")
             idLabel.configure(text=f"No sensor picked")
 
@@ -180,7 +190,7 @@ class GUI():
 
         # ------------------------------------------------------------------------------
 
-        # Exit button command
+        # Main menu exit button action
         def exitClick():
             self.serverHandler.closeSocket()
             window.quit()
@@ -190,12 +200,7 @@ class GUI():
 
         # ------------------------------------------------------------------------------
 
-        def plotClick():
-            print("test")
-            # recv = self.serverHandler.getRange(everyID[self.counter])
-            # rangeAmount = recv[recv.find(":") + 1:]
-            # print(rangeAmount)
-
+        # plot button action. Creates a plot and saves it in a file
         def plotClick():
             plotData = []
             plotTime = []
@@ -205,26 +210,30 @@ class GUI():
             nextButton['state'] = DISABLED
             plotButton['state'] = DISABLED
 
+            # Creates a plot for every ID that is visible
             for item in everyID:
-                recv = self.serverHandler.getRange(item)
+                recv = self.serverHandler.getRange(item)  # Sends a request to a server to get range for a specific sensor
                 rangeAmount = recv[recv.find(":") + 1:]
 
-                recv2 = self.serverHandler.getData(item, rangeAmount)
+                recv2 = self.serverHandler.getData(item, rangeAmount)  # Sends a request to a server to get a specific amount of data from a specific sensor
                 rangeStuff = recv2[recv2.find(":") + 1:]
                 print(f"ID: {item}, range amount {rangeAmount}, Data: {rangeStuff}")
 
                 cleanRangeData = []
 
+                # GUI receives a specific amount of data as a one string. Need to split to put it into an array
                 rangeStuffSplit = rangeStuff.splitlines()
+                # Removes '{},' from the string
                 for j in rangeStuffSplit:
 
-                    disallowed_charachters = "{},"
-                    for charachters in disallowed_charachters:
-                        j = j.replace(charachters, "")
+                    disallowed_characters = "{},"
+                    for characters in disallowed_characters:
+                        j = j.replace(characters, "")
                     individualCleanRangeData = j.strip()
 
                     cleanRangeData.append(individualCleanRangeData)
 
+                # Somehow server sends last and first data without a random number, so removing it is an option
                 try:
                     cleanRangeData.pop(int(rangeAmount) + 1)
                 except:
@@ -235,6 +244,7 @@ class GUI():
                 veryCleanRangeData = []
                 veryCleanRangeTime = []
 
+                # Cleans the data, for example: "2022/11/29 - 15:30:30":"-8" turns into -8
                 for v in cleanRangeData:
                     individualVeryCleanData = ""
                     individualVeryVeryCleanData = ""
@@ -260,6 +270,7 @@ class GUI():
 
                 print(f"Clean data: {veryCleanRangeData}")
 
+                # Cleans the data, for example: "2022/11/29 - 15:30:30":"-8" turns into 2022/11/29 - 15:30:30
                 for b in cleanRangeData:
                     individualVeryCleanTime = ""
                     individualVeryVeryCleanTime = ""
@@ -275,27 +286,13 @@ class GUI():
 
                 plot = Plot.Plot(veryCleanRangeData, veryCleanRangeTime, item)
 
-            self.serverHandler.closeSocket()
+            self.serverHandler.closeSocket()  # closes a socket
             window.quit()
-
-            # How to save data to dictionary. Ask a question?
-
-            # n = 0
-            # for i in veryCleanRangeTime:
-            #    plotData[i] = veryCleanRangeData[n]
-            #    n = n + 1
-
-            # plotData.append(graphData)
-            # plotTime.append(graphTime)
-
-            # print(plotData)
-            # plot = Plot.Plot(plotData, plotTime)
 
         plotButton = Button(frameMenu, text="Plot", bg='#84A9C0', command=plotClick)
         plotButton.place(x=450, y=100)
 
-        # Opens the sensor list frame
-
+    # Opens the sensor list frame
     def showClick(self, window, frameMenu):
         print("refreshed show menu")
 
@@ -314,6 +311,7 @@ class GUI():
         hideLabel = Label(frameShow, text="Hiding", bg='#84A9C0')
         hideLabel.place(x=300, y=125)
 
+        # Sensor list exit button
         def exitShow():
             frameShow.destroy()
             frameMenu.destroy()
@@ -328,6 +326,8 @@ class GUI():
         hideListBox = Listbox(frameSShow, width=30, height=15)
         hideListBox.place(x=250, y=0)
 
+        # reads the file 'fide.pkl'
+        # If the program is opened first time or there is no file called 'fide.pkl', it creates it
         try:
             with open('hide.pkl', 'rb') as file:
                 hiddenData = pickle.load(file)
@@ -336,6 +336,7 @@ class GUI():
                 pass
                 hiddenData = []
 
+        # Puts ID from file to a Hidden sensor list
         for item in hiddenData:
             hideListBox.insert(END, item)
 
@@ -344,10 +345,11 @@ class GUI():
         showListBox = Listbox(frameSShow, width=30, height=15)
         showListBox.place(x=0, y=0)
 
-        recv = self.serverHandler.getIDS()
+        recv = self.serverHandler.getIDS()  # Sends a request to a server for connected sensor IDs
         dataRec = recv[recv.find(":") + 1:]
         showableData = dataRec.split(" ")
 
+        # Removes IDs in showableData that are same with hiddenData IDs
         for i in hiddenData:
             for j in showableData:
                 if i == j:
@@ -402,6 +404,7 @@ class GUI():
             toShowButton['state'] = DISABLED
             toHideButton['state'] = DISABLED
 
+            # writes the changes in file using pickle
             with open('hide.pkl', 'wb') as file:
                 pickle.dump(hideListBox.get(0, END), file)
 
