@@ -1,4 +1,7 @@
 package server;
+/*
+ * This software has been documented using JavaDoc, all classes and methods are documented
+ */
 
 import java.io.IOException;
 import java.util.Map;
