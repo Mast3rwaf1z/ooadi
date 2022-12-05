@@ -30,7 +30,7 @@ class ServerHandler:
         return self.s.recv(1024).decode("utf-8")
 
     # Sends a request to a server to get range for a specific sensor
-    def getRange(self, ids: object) -> object:
+    def getRange(self, ids):
         self.s.send(f'getrange {ids}\n'.encode('utf-8'))
         return self.s.recv(1024).decode("utf-8")
 
